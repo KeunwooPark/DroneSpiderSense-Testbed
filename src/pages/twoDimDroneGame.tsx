@@ -3,10 +3,12 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { NextPage } from "next"
 import { KeyboardEventHandler, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
+import { Mesh, Vector3 } from "three";
 import TwoDimDroneGameThreeScene from "../components/TwoDimDroneGameThreeScene";
 
 interface IWallProps {
     maxWidth: number;
+    minPathWidth: number;
     thickness: number;
     pathCenter: number;
     pathWidth: number;
@@ -14,18 +16,40 @@ interface IWallProps {
 
 }
 
-function CameraControl(props: any) {
+function DroneControl(props: any) {
 
     const speed = 0.02;
+    const probDist = 0.3;
+    const numProbes = 8;
     const [controlState, setControlState] = useState({forward: 0, backward: 0, right: 0, left: 0});
     const droneRef = useRef();
-    
+
+    const probes: JSX.Element[] = [];
+    const probeRefs: any[] = [];
+
+    for (let i = 0; i < numProbes; i++) {
+        const angle = i * Math.PI / 4;
+        const x = Math.cos(angle) * probDist;
+        const y = Math.sin(angle) * probDist;
+        const probeRef = useRef();
+        probeRefs.push(probeRef);
+        probes.push(
+            <mesh>
+                <Sphere ref={probeRef} key={i + numProbes} position={[x, y, 0]} args={[0.05]}>
+                    <meshBasicMaterial key={i + numProbes * 2} attach="material" color="red" />
+                </Sphere>
+            </mesh>
+        );
+
+    }
 
     useFrame((state) => {
         state.camera.position.y += controlState.forward * speed;
         state.camera.position.y -= controlState.backward * speed;
         state.camera.position.x += controlState.right * speed;
         state.camera.position.x -= controlState.left * speed;
+        
+        const distances: number[] = [];
 
         if (droneRef.current != null) {
             const drone = droneRef.current as THREE.Mesh;
@@ -33,6 +57,22 @@ function CameraControl(props: any) {
             drone.position.y -= controlState.backward * speed;
             drone.position.x += controlState.right * speed;
             drone.position.x -= controlState.left * speed;
+            
+            for (const ref of probeRefs) {
+                const probeMesh = ref.current as Mesh;
+                const direction = new Vector3().subVectors(probeMesh.position, drone.position).normalize();
+
+                const raycaster = new THREE.Raycaster(probeMesh.position, direction, 0, 100);
+                const intersects = raycaster.intersectObjects(state.scene.children);
+                const reasonableIntersects = intersects.filter(intersect => intersect.distance > 0 && intersect.distance < Infinity);
+                if (reasonableIntersects.length > 0) {
+                    const minDistance = Math.min(...reasonableIntersects.map(i => i.distance));
+                    distances.push(minDistance);
+                } else {
+                    distances.push(Infinity);
+                }
+            }
+            
         }
     });
 
@@ -75,7 +115,12 @@ function CameraControl(props: any) {
         });
     });
 
-    return <Sphere ref={droneRef} args={[0.3]}></Sphere>
+    return <mesh>
+                <Sphere ref={droneRef} args={[0.15]}>
+                    <meshBasicMaterial attach="material" color="blue" />
+                    {probes}
+                </Sphere>
+            </mesh>
 }
 
 function Wall(props: IWallProps) {
@@ -100,12 +145,15 @@ function Wall(props: IWallProps) {
         </mesh>);
 }
 
+function minMaxRandom(min: number, max: number): number {
+    return Math.random() * (max - min) + min;
+}
 
-function createRandomeWallParams(): IWallProps {
-    const maxWidth = 6;
-    const thickness = 0.3;
-    const maxPathCenter = maxWidth - 1;
-    const pathCenter = Math.random() * maxPathCenter - maxPathCenter / 2;
+function createRandomeWallParams(prevParams: IWallProps): IWallProps {
+    const maxWidth = prevParams.maxWidth;
+    const thickness = prevParams.thickness;
+    const minPathWidth = prevParams.minPathWidth;
+    const pathCenter = minMaxRandom(prevParams.pathCenter - prevParams.pathWidth / 4, prevParams.pathCenter + prevParams.pathWidth / 4);
 
     let maxPathWidth = 0;
     if (pathCenter > 0) {
@@ -113,10 +161,10 @@ function createRandomeWallParams(): IWallProps {
     } else {
         maxPathWidth = maxWidth / 2 + pathCenter;
     }
-    
-    const pathWidth = Math.random() * maxPathWidth;
 
-    return { maxWidth, thickness, pathCenter, pathWidth, distance: 0 };
+    const pathWidth = minMaxRandom(minPathWidth, maxPathWidth);
+
+    return { maxWidth, thickness, pathCenter, pathWidth, distance: 0, minPathWidth };
 }
 
 const TwoDimDroneGame: NextPage = () => {
@@ -125,11 +173,12 @@ const TwoDimDroneGame: NextPage = () => {
     const wallOffset = 1;
 
     const wallItems: JSX.Element[] = [];
+    let prevParams: IWallProps = {maxWidth: 6, thickness: 0.3, pathCenter: 0, pathWidth: 0, distance: 0, minPathWidth: 0.3};
     for (let i = 0; i < numWalls; i++) {
-        const wallParams = createRandomeWallParams();
+        const wallParams = createRandomeWallParams(prevParams);
         wallParams.distance = i * wallParams.thickness + wallOffset;
-        console.log(wallParams);
-        wallItems.push(<Wall key={i} maxWidth={wallParams.maxWidth} thickness={wallParams.thickness} pathCenter={wallParams.pathCenter} pathWidth={wallParams.pathWidth} distance={wallParams.distance} />);
+        wallItems.push(<Wall key={i} maxWidth={wallParams.maxWidth} thickness={wallParams.thickness} pathCenter={wallParams.pathCenter} pathWidth={wallParams.pathWidth} distance={wallParams.distance} minPathWidth={wallParams.minPathWidth} />);
+        prevParams = wallParams;
     }
 
     return (
@@ -140,7 +189,7 @@ const TwoDimDroneGame: NextPage = () => {
                     <color args={["#1e1e1e"]} attach="background" />
                     <primitive object={new THREE.AxesHelper(10)} />
                     <ambientLight />
-                    <CameraControl />
+                    <DroneControl />
                     {wallItems}
                 </Canvas>
             </div>
