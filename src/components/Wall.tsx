@@ -1,4 +1,7 @@
-import { Box } from "@react-three/drei";
+import { Physics, Triplet, useBox } from "@react-three/cannon";
+import { Box, useHelper } from "@react-three/drei";
+import { useRef } from "react";
+import { BoxHelper, Mesh } from "three";
 import IWallProps from "./IWallProps";
 const wallLayerNumber = 1;
 
@@ -18,8 +21,20 @@ export default function Wall(props: IWallProps) {
     const leftWallHeight = thickness;
     const leftWallPosX = (leftWallLeftMost + leftWallRightMost) / 2; 
 
-    return (<mesh>
-                <Box position={[rightWallPosX, distance, 0]} args={[rightWallLength, rightWallHeight, 1]} layers={props.layerNumber} ></Box>
-                <Box position={[leftWallPosX, distance, 0]} args={[leftWallLength, leftWallHeight, 1]} layers={props.layerNumber}></Box>
-        </mesh>);
+    // const rightWallArgs = {width: 1, height: 1, depth: 1};
+    const rightWallArgs: Triplet = [rightWallLength, rightWallHeight, 1];
+    const leftWallArgs: Triplet = [leftWallLength, leftWallHeight, 1];
+
+    const [rightWallRef] = useBox<Mesh>(() => ({ mass: 1, position: [rightWallPosX, distance, 0], type: "Static", args: rightWallArgs}));
+    const [leftWallRef] = useBox<Mesh>(() => ({ mass: 1, position: [leftWallPosX, distance, 0], type: "Static", args: leftWallArgs} ));
+    const geometryRef = useRef(null);
+
+    return (<>
+                <mesh ref={rightWallRef} layers={props.layerNumber}>
+                    <boxGeometry args={rightWallArgs}/>
+                </mesh>
+                <mesh ref={leftWallRef} layers={props.layerNumber}>
+                    <boxGeometry args={leftWallArgs}/>
+                </mesh>
+            </>);
 }

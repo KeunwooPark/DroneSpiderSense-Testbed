@@ -4,6 +4,8 @@ import Wall from "./Wall";
 
 const numWalls = 50;
 const wallOffset = 1;
+const wallThickness = 0.3;
+const minPathWidth = 0.5;
 
 interface IMapProps {
     initialWallParams: IWallProps;
@@ -37,7 +39,7 @@ export default function GameMap(props: IMapProps) {
 function createRandomWallParamsForMap(initialParams: IWallProps, numWalls: number, wallOffset: number): IWallProps[] {
     const wallParamsForMap: IWallProps[] = [];
 
-    let prevParams: IWallProps = {maxWidth: 6, thickness: 0.3, pathCenter: 0, pathWidth: 0, distance: 0, minPathWidth: 0.3, layerNumber: 0};
+    let prevParams: IWallProps = {maxWidth: 6, thickness: wallThickness, pathCenter: 0, pathWidth: 0, distance: 0, minPathWidth: minPathWidth, layerNumber: 0};
     for (let i = 0; i < numWalls; i++) {
         const wallParams = createRandomWallParams(prevParams);
         wallParams.distance = i * wallParams.thickness + wallOffset;

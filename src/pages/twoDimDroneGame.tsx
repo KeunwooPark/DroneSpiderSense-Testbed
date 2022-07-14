@@ -1,10 +1,10 @@
-import { Bounds, Box, FirstPersonControls, FlyControls, Line, MapControls, OrbitControls, OrthographicCamera, Sphere, useHelper } from "@react-three/drei";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Debug, Physics, SphereArgs, Triplet, useBox, useSphere } from "@react-three/cannon";
+import { Line, Sphere, useHelper } from "@react-three/drei";
+import { Canvas, useFrame } from "@react-three/fiber";
 import { NextPage } from "next"
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
-import { Box3, BoxHelper, Layers, Mesh, Object3D, Scene, Vector3 } from "three";
-import { nullable } from "zod";
+import { BoxHelper, Mesh, Vector3 } from "three";
 import GameMap from "../components/GameMap";
 
 const wallLayerNumber = 1;
@@ -18,15 +18,22 @@ function DroneControl(props: IDroneControlProps) {
     const speed = 0.02;
     const probDist = 0.3;
     const numProbes = 8;
+    const droneSize = 0.15;
     const [controlState, setControlState] = useState({forward: 0, backward: 0, right: 0, left: 0});
     const [droneWorldPosition, setDroneWorldPosition] = useState(new Vector3(0, 0, 0));
     const [raycastHitPoints, setRaycastHitPoints] = useState<Vector3[]>([]);
-    const droneRef = useRef();
-    const state = useThree();
+    const [droneCollilde, setDroneCollilde] = useState(false);
 
-    useHelper(droneRef, BoxHelper, "royalblue");
+    const droneArgs: SphereArgs = [droneSize];
 
-    //const raycaster = new THREE.Raycaster();
+    const [droneRef, droneApi] = useSphere<Mesh>(() => ({ mass: 1, 
+                                                        position: [0, 0, 0],
+                                                        type: "Kinematic",
+                                                        args: droneArgs,
+                                                        collisionResponse: true,
+                                                        onCollideBegin: (e) => {setDroneCollilde(true), console.log("collide begin")},
+                                                        onCollideEnd: (e) => {setDroneCollilde(false), console.log("collide end")},
+                                                    }));
     const probes: JSX.Element[] = [];
     const probeRefs: any[] = [];
 
@@ -36,11 +43,10 @@ function DroneControl(props: IDroneControlProps) {
         const y = Math.sin(angle) * probDist;
         const probeRef = useRef();
         probeRefs.push(probeRef);
-        const currentTime = Date.now();
         probes.push(
             <mesh>
-                <Sphere ref={probeRef} key={`drone-shpere-${i}-${currentTime}`} position={[x, y, 0]} args={[0.05]}>
-                    <meshBasicMaterial key={`drone-sphere-mat-${i}-${currentTime}`} attach="material" color="red" />
+                <Sphere ref={probeRef} key={i} position={[x, y, 0]} args={[0.05]}>
+                    <meshBasicMaterial attach="material" color="red" />
                 </Sphere>
             </mesh>
         );
@@ -60,47 +66,39 @@ function DroneControl(props: IDroneControlProps) {
         state.camera.position.x -= controlState.left * speed;
         const raycastHitPoints: Vector3[] = [];
         
-        if (droneRef.current != null) {
+        const newDronePosition = new Vector3(state.camera.position.x, state.camera.position.y, 0);
+        droneApi.position.copy(newDronePosition);
 
-            // if (checkForCollision(state.scene.children, droneRef.current)) {
-            //     console.log("collision");
-            // }
+        const drone = droneRef.current as Mesh;
+        
+        const droneWorldPosition = new Vector3();
+        drone.getWorldPosition(droneWorldPosition);
+        setDroneWorldPosition(droneWorldPosition.clone());
+        const raycaster = state.raycaster;
+        raycaster.camera = state.camera;
+        raycaster.layers.set(wallLayerNumber);
 
-            const drone = droneRef.current as THREE.Mesh;
-            drone.position.y += controlState.forward * speed;
-            drone.position.y -= controlState.backward * speed;
-            drone.position.x += controlState.right * speed;
-            drone.position.x -= controlState.left * speed;
+        for (const ref of probeRefs) {
+            const probeMesh = ref.current as Mesh;
+            if (probeMesh == null) {
+                continue;
+            }
+            const probeWorldPosition = new Vector3();
+            probeMesh.getWorldPosition(probeWorldPosition);
+            const direction = new Vector3().subVectors(probeWorldPosition, droneWorldPosition);
+            direction.normalize();
+            raycaster.set(droneWorldPosition.clone(), direction.clone());
 
-            const droneWorldPosition = new Vector3();
-            drone.getWorldPosition(droneWorldPosition);
-            setDroneWorldPosition(droneWorldPosition.clone());
-            const raycaster = state.raycaster;
-            raycaster.camera = state.camera;
-            raycaster.layers.set(wallLayerNumber);
-
-            for (const ref of probeRefs) {
-                const probeMesh = ref.current as Mesh;
-                if (probeMesh == null) {
-                    continue;
-                }
-                const probeWorldPosition = new Vector3();
-                probeMesh.getWorldPosition(probeWorldPosition);
-                const direction = new Vector3().subVectors(probeWorldPosition, droneWorldPosition);
-                direction.normalize();
-                raycaster.set(droneWorldPosition.clone(), direction.clone());
-
-                const intersects = raycaster.intersectObjects(state.scene.children);
-                if (intersects.length > 0) {
-                    intersects.sort((a, b) => a.distance - b.distance);
-                    const closestIntersect = intersects[0]!;
-                    if (closestIntersect.distance != null && closestIntersect?.distance < Infinity && closestIntersect?.point != null) {
-                        raycastHitPoints.push(closestIntersect?.point!.clone());
-                    }
+            const intersects = raycaster.intersectObjects(state.scene.children);
+            if (intersects.length > 0) {
+                intersects.sort((a, b) => a.distance - b.distance);
+                const closestIntersect = intersects[0]!;
+                if (closestIntersect.distance != null && closestIntersect?.distance < Infinity && closestIntersect?.point != null) {
+                    raycastHitPoints.push(closestIntersect?.point!.clone());
                 }
             }
-            setRaycastHitPoints(raycastHitPoints);
         }
+        setRaycastHitPoints(raycastHitPoints);
 
     });
 
@@ -143,13 +141,14 @@ function DroneControl(props: IDroneControlProps) {
         });
     });
 
-    return (<mesh>
-                <Sphere ref={droneRef} args={[0.15]}>
-                    <meshBasicMaterial attach="material" color="blue" />
+    return (<>
+                <mesh ref={droneRef}>
+                    <sphereGeometry args={droneArgs}/>
+                    <meshBasicMaterial attach="material" color={droneCollilde? "red" : "blue"} />
                     {probes.length > 0? probes : <></>}
-                </Sphere>
+                </mesh>
                 <RayCastLineGroup center={droneWorldPosition} points={raycastHitPoints} />
-            </mesh>);
+            </>);
 }
 
 interface IRaycastLineGroupProps {
@@ -190,11 +189,14 @@ const TwoDimDroneGame: NextPage = () => {
             <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={handleHideWallsClick}>{hideWalls? "show walls" : "hide walls"}</button>
             <div className="w-1/2 h-1/2">
                 <Canvas className="" camera={{position: [0, 0, 1], zoom: camZoomLevel}} orthographic>
-                    <color args={["#1e1e1e"]} attach="background" />
-                    {/* <primitive object={new THREE.AxesHelper(10)} /> */}
-                    <ambientLight />
-                    <DroneControl hideWalls={hideWalls} />
-                    <GameMap initialWallParams={initialWallParams} />
+                    <color args={["#000000"]} attach="background" />
+                    <Physics>
+                        {/* <primitive object={new THREE.AxesHelper(10)} /> */}
+                        {/* <OrbitControls /> */}
+                        <ambientLight />
+                        <DroneControl hideWalls={hideWalls} />
+                        <GameMap initialWallParams={initialWallParams} />
+                    </Physics>
                 </Canvas>
             </div>
         </div>
