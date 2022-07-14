@@ -1,22 +1,13 @@
-import { Box, FirstPersonControls, FlyControls, Line, MapControls, OrbitControls, OrthographicCamera, Sphere } from "@react-three/drei";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Bounds, Box, FirstPersonControls, FlyControls, Line, MapControls, OrbitControls, OrthographicCamera, Sphere, useHelper } from "@react-three/drei";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { NextPage } from "next"
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
-import { Mesh, Scene, Vector3 } from "three";
+import { Box3, BoxHelper, Layers, Mesh, Object3D, Scene, Vector3 } from "three";
 import { nullable } from "zod";
+import GameMap from "../components/GameMap";
 
-const wallLayer = 1;
-
-interface IWallProps {
-    maxWidth: number;
-    minPathWidth: number;
-    thickness: number;
-    pathCenter: number;
-    pathWidth: number;
-    distance: number;
-
-}
+const wallLayerNumber = 1;
 
 interface IDroneControlProps {
     hideWalls: boolean;
@@ -31,12 +22,13 @@ function DroneControl(props: IDroneControlProps) {
     const [droneWorldPosition, setDroneWorldPosition] = useState(new Vector3(0, 0, 0));
     const [raycastHitPoints, setRaycastHitPoints] = useState<Vector3[]>([]);
     const droneRef = useRef();
+    const state = useThree();
+
+    useHelper(droneRef, BoxHelper, "royalblue");
 
     //const raycaster = new THREE.Raycaster();
     const probes: JSX.Element[] = [];
     const probeRefs: any[] = [];
-    const lines: JSX.Element[] = [];
-    const lineRefs: any[] = [];
 
     for (let i = 0; i < numProbes; i++) {
         const angle = i * Math.PI / 4;
@@ -57,17 +49,23 @@ function DroneControl(props: IDroneControlProps) {
 
     useFrame((state) => {
         if (!props.hideWalls) {
-            state.camera.layers.enable(wallLayer);
+            state.camera.layers.enable(wallLayerNumber);
         } else {
-            state.camera.layers.disable(wallLayer);
+            console.log()
+            state.camera.layers.disable(wallLayerNumber);
         }
         state.camera.position.y += controlState.forward * speed;
         state.camera.position.y -= controlState.backward * speed;
         state.camera.position.x += controlState.right * speed;
         state.camera.position.x -= controlState.left * speed;
         const raycastHitPoints: Vector3[] = [];
-
+        
         if (droneRef.current != null) {
+
+            // if (checkForCollision(state.scene.children, droneRef.current)) {
+            //     console.log("collision");
+            // }
+
             const drone = droneRef.current as THREE.Mesh;
             drone.position.y += controlState.forward * speed;
             drone.position.y -= controlState.backward * speed;
@@ -79,7 +77,7 @@ function DroneControl(props: IDroneControlProps) {
             setDroneWorldPosition(droneWorldPosition.clone());
             const raycaster = state.raycaster;
             raycaster.camera = state.camera;
-            raycaster.layers.set(wallLayer);
+            raycaster.layers.set(wallLayerNumber);
 
             for (const ref of probeRefs) {
                 const probeMesh = ref.current as Mesh;
@@ -101,7 +99,6 @@ function DroneControl(props: IDroneControlProps) {
                     }
                 }
             }
-
             setRaycastHitPoints(raycastHitPoints);
         }
 
@@ -175,68 +172,13 @@ function RayCastLineGroup(props: IRaycastLineGroupProps) {
     return (<>{getLines()}</>);
 }
 
-
-function Wall(props: IWallProps) {
-    const { maxWidth, thickness, pathCenter, pathWidth, distance } = props;
-
-    const rightWallLeftMost = pathCenter + pathWidth / 2;
-    const rightWallRightMost = maxWidth / 2;
-
-    const rightWallLength = rightWallRightMost - rightWallLeftMost;
-    const rightWallHeight = thickness;
-    const rightWallPosX = (rightWallLeftMost + rightWallRightMost) / 2;
-
-    const leftWallLeftMost = -maxWidth / 2;
-    const leftWallRightMost = pathCenter - pathWidth / 2;
-    const leftWallLength = leftWallRightMost - leftWallLeftMost;
-    const leftWallHeight = thickness;
-    const leftWallPosX = (leftWallLeftMost + leftWallRightMost) / 2; 
-
-    return (<mesh>
-            <Box position={[rightWallPosX, distance, 0]} args={[rightWallLength, rightWallHeight, 1]} layers={wallLayer}></Box>
-            <Box position={[leftWallPosX, distance, 0]} args={[leftWallLength, leftWallHeight, 1]} layers={wallLayer}></Box>
-        </mesh>);
-}
-
-function minMaxRandom(min: number, max: number): number {
-    return Math.random() * (max - min) + min;
-}
-
-
-
 const TwoDimDroneGame: NextPage = () => {
 
-    const numWalls = 50;
-    const wallOffset = 1;
+    
     const camZoomLevel = 70;
 
     const [hideWalls, setHideWalls] = useState(false);
-    const initialWallParams = {maxWidth: 6, thickness: 0.3, pathCenter: 0, pathWidth: 0, distance: 0, minPathWidth: 0.3}
-    const [mapWallParams, setMapWallParams] = useState<IWallProps[]>([]);
-
-    useEffect(() => {
-        setMapWallParams(createRandomWallParamsForMap(initialWallParams, numWalls, wallOffset));
-    }, []);
-    // const wallItems: JSX.Element[] = [];
-    // let prevParams: IWallProps = {maxWidth: 6, thickness: 0.3, pathCenter: 0, pathWidth: 0, distance: 0, minPathWidth: 0.3};
-    // for (let i = 0; i < numWalls; i++) {
-    //     const wallParams = createRandomWallParams(prevParams);
-    //     wallParams.distance = i * wallParams.thickness + wallOffset;
-    //     wallItems.push(<Wall key={i} maxWidth={wallParams.maxWidth} thickness={wallParams.thickness} pathCenter={wallParams.pathCenter} pathWidth={wallParams.pathWidth} distance={wallParams.distance} minPathWidth={wallParams.minPathWidth} />);
-    //     prevParams = wallParams;
-    // }
-
-    function getWallComponents() {
-        if (mapWallParams == null) {
-            return null;
-        }
-        const wallComponents: JSX.Element[] = [];
-        for (const wallParam of mapWallParams) {
-            wallComponents.push(<Wall key={wallParam.distance} maxWidth={wallParam.maxWidth} thickness={wallParam.thickness} pathCenter={wallParam.pathCenter} pathWidth={wallParam.pathWidth} distance={wallParam.distance} minPathWidth={wallParam.minPathWidth} />);
-        }
-
-        return wallComponents;
-    }
+    const initialWallParams = {maxWidth: 6, thickness: 0.3, pathCenter: 0, pathWidth: 0, distance: 0, minPathWidth: 0.3, layerNumber: wallLayerNumber };
 
     function handleHideWallsClick() {
         setHideWalls(!hideWalls);
@@ -252,43 +194,11 @@ const TwoDimDroneGame: NextPage = () => {
                     {/* <primitive object={new THREE.AxesHelper(10)} /> */}
                     <ambientLight />
                     <DroneControl hideWalls={hideWalls} />
-                    {getWallComponents()}
+                    <GameMap initialWallParams={initialWallParams} />
                 </Canvas>
             </div>
         </div>
     )
 }
-
-function createRandomWallParamsForMap(initialParams: IWallProps, numWalls: number, wallOffset: number): IWallProps[] {
-    const wallParamsForMap: IWallProps[] = [];
-
-    let prevParams: IWallProps = {maxWidth: 6, thickness: 0.3, pathCenter: 0, pathWidth: 0, distance: 0, minPathWidth: 0.3};
-    for (let i = 0; i < numWalls; i++) {
-        const wallParams = createRandomWallParams(prevParams);
-        wallParams.distance = i * wallParams.thickness + wallOffset;
-        wallParamsForMap.push(wallParams);
-        prevParams = wallParams;
-    }
-    return wallParamsForMap;
-}
-
-function createRandomWallParams(prevParams: IWallProps): IWallProps {
-    const maxWidth = prevParams.maxWidth;
-    const thickness = prevParams.thickness;
-    const minPathWidth = prevParams.minPathWidth;
-    const pathCenter = minMaxRandom(prevParams.pathCenter - prevParams.pathWidth / 4, prevParams.pathCenter + prevParams.pathWidth / 4);
-
-    let maxPathWidth = 0;
-    if (pathCenter > 0) {
-        maxPathWidth = maxWidth / 2 - pathCenter;
-    } else {
-        maxPathWidth = maxWidth / 2 + pathCenter;
-    }
-
-    const pathWidth = minMaxRandom(minPathWidth, maxPathWidth);
-
-    return { maxWidth, thickness, pathCenter, pathWidth, distance: 0, minPathWidth };
-}
-
 
 export default TwoDimDroneGame;
