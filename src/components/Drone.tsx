@@ -68,7 +68,9 @@ export default function Drone(props: IDroneProps) {
 
     useEffect(() => {
         pollGamepad(0);
+    }, []);
 
+    useEffect(function setSensors() {
         const distanceSensors: JSX.Element[] = [];
         for (let i = 0; i < numProbes; i++) {
             const angle = i * (2 * Math.PI / numProbes);
@@ -87,7 +89,7 @@ export default function Drone(props: IDroneProps) {
         }
         
         setDistanceSensors(distanceSensors);
-    }, []);
+    }, [props.wallLayerNumber, props.hideRays]);
 
     return (<>
                 <mesh ref={droneRef}>
