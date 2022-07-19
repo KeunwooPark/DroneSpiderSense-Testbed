@@ -12,20 +12,32 @@ const wallLayerNumber = 1;
 const camZoomLevel = 150;
 
 const TwoDimDroneGame: NextPage = () => {
-
-    
-
     const [hideWalls, setHideWalls] = useState(false);
+    const [hideRays, setHideRays] = useState(false);
     const initialWallParams = {maxWidth: 6, thickness: 0.3, pathCenter: 0, pathWidth: 0, distance: 0, minPathWidth: 0.3, layerNumber: wallLayerNumber };
 
-    function handleHideWallsClick() {
+    function handleHideWallsChange() {
         setHideWalls(!hideWalls);
+    }
+
+    function handleHideRaysChange() {
+        setHideRays(!hideRays);
     }
 
     return (
         <div className="h-screen">
             <h1 className="text-5xl">TwoDimDroneGame</h1>
-            <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={handleHideWallsClick}>{hideWalls? "show walls" : "hide walls"}</button>
+            <div className="ml-3">
+                <div>walls</div> 
+                <input type="checkbox" className="toggle" checked={!hideWalls} onChange={handleHideWallsChange} />
+            </div>
+
+            <div className="ml-3">
+                <div>rays</div> 
+                <input type="checkbox" className="toggle" checked={!hideRays} onChange={handleHideRaysChange} />
+            </div>
+            
+            {/* <button className="btn btn-primary" onClick={handleHideWallsClick}>{hideWalls? "show walls" : "hide walls"}</button> */}
             <div className="w-1/2 h-1/2">
                 <Canvas className="" camera={{position: [0, 0, 1], zoom: camZoomLevel}} orthographic>
                     <color args={["#000000"]} attach="background" />
@@ -33,7 +45,7 @@ const TwoDimDroneGame: NextPage = () => {
                         {/* <primitive object={new THREE.AxesHelper(10)} /> */}
                         {/* <OrbitControls /> */}
                         <ambientLight />
-                        <Drone wallLayerNumber={wallLayerNumber} />
+                        <Drone wallLayerNumber={wallLayerNumber} hideRays={hideRays} />
                         <GameMap initialWallParams={initialWallParams} hideWalls={hideWalls} wallLayerNumber={wallLayerNumber} />
                     </Physics>
                 </Canvas>

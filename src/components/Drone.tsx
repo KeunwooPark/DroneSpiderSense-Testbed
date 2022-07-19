@@ -7,6 +7,7 @@ import DistanceSensor from "./DistanceSensor";
 
 interface IDroneProps {
     wallLayerNumber: number;
+    hideRays: boolean;
 }
 
 interface IGamepadState {
@@ -25,6 +26,8 @@ export default function Drone(props: IDroneProps) {
 
     const [gamepadState, setGamepadState] = useState<IGamepadState>({xAxis: 0, yAxis: 0});
 
+    const [distanceSensors, setDistanceSensors] = useState<JSX.Element[]>([]);
+
     const droneArgs: SphereArgs = [droneSize];
 
     const [droneRef, droneApi] = useSphere<Mesh>(() => ({ mass: 1, 
@@ -36,29 +39,9 @@ export default function Drone(props: IDroneProps) {
                                                         onCollideEnd: (e) => {setDroneCollilde(false)},
                                                     }));
 
-    const distanceSensors: JSX.Element[] = [];
-
-    for (let i = 0; i < numProbes; i++) {
-        const angle = i * (2 * Math.PI / numProbes);
-        const x = Math.cos(angle) * probDist;
-        const y = Math.sin(angle) * probDist;
-        const direction = new Vector3(x, y, 0);
-        direction.normalize();
-        
-        distanceSensors.push(<DistanceSensor key={`sensor-${i}`} 
-                                            droneRef={droneRef} 
-                                            wallLayerNumber={props.wallLayerNumber} 
-                                            direction={direction} 
-                                            showRaycastLine={true} 
-                                            showAngleRange={false}
-                                            angleRange={2 * Math.PI / numProbes} />);
-    }
+    
 
     useFrame((state) => {
-        // state.camera.position.y += controlState.forward * speed;
-        // state.camera.position.y -= controlState.backward * speed;
-        // state.camera.position.x += controlState.right * speed;
-        // state.camera.position.x -= controlState.left * speed;
 
         const diff = new Vector3(gamepadState.xAxis, -gamepadState.yAxis, 0).multiplyScalar(speed);
         const newCamPos = state.camera.position.clone().add(diff);
@@ -85,43 +68,26 @@ export default function Drone(props: IDroneProps) {
 
     useEffect(() => {
         pollGamepad(0);
-        window.addEventListener("keydown", (event) => {
-            if (event.key === "w") {
-                setControlState({forward: 1, backward: controlState.backward, right: controlState.right, left: controlState.left});
-            }
+
+        const distanceSensors: JSX.Element[] = [];
+        for (let i = 0; i < numProbes; i++) {
+            const angle = i * (2 * Math.PI / numProbes);
+            const x = Math.cos(angle) * probDist;
+            const y = Math.sin(angle) * probDist;
+            const direction = new Vector3(x, y, 0);
+            direction.normalize();
             
-            if (event.key === "s") {
-                setControlState({forward: controlState.forward, backward: 1, right: controlState.right, left: controlState.left});
-            }
-
-            if (event.key === "d") {
-                setControlState({forward: controlState.forward, backward: controlState.backward, right: 1, left: controlState.left});
-            }
-
-            if (event.key === "a") {
-                setControlState({forward: controlState.forward, backward: controlState.backward, right: controlState.right, left: 1});
-            }
-        });
-
-        window.addEventListener("keyup", (event) => {
-            if (event.key === "w") {
-                setControlState({forward: 0, backward: controlState.backward, right: controlState.right, left: controlState.left});
-            }
-            
-            if (event.key === "s") {
-                setControlState({forward: controlState.forward, backward: 0, right: controlState.right, left: controlState.left});
-            }
-
-            if (event.key === "d") {
-                setControlState({forward: controlState.forward, backward: controlState.backward, right: 0, left: controlState.left});
-            }
-
-            if (event.key === "a") {
-                setControlState({forward: controlState.forward, backward: controlState.backward, right: controlState.right, left: 0});
-            }
-
-        });
-    });
+            distanceSensors.push(<DistanceSensor key={`sensor-${i}`} 
+                                                droneRef={droneRef} 
+                                                wallLayerNumber={props.wallLayerNumber} 
+                                                direction={direction} 
+                                                showRaycastLine={!props.hideRays} 
+                                                showAngleRange={false}
+                                                angleRange={2 * Math.PI / numProbes} />);
+        }
+        
+        setDistanceSensors(distanceSensors);
+    }, []);
 
     return (<>
                 <mesh ref={droneRef}>
