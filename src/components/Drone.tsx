@@ -9,6 +9,11 @@ interface IDroneProps {
     wallLayerNumber: number;
 }
 
+interface IGamepadState {
+    xAxis: number;
+    yAxis: number;
+}
+
 export default function Drone(props: IDroneProps) {
 
     const speed = 0.02;
@@ -17,6 +22,8 @@ export default function Drone(props: IDroneProps) {
     const droneSize = 0.1;
     const [controlState, setControlState] = useState({forward: 0, backward: 0, right: 0, left: 0});
     const [droneCollilde, setDroneCollilde] = useState(false);
+
+    const [gamepadState, setGamepadState] = useState<IGamepadState>({xAxis: 0, yAxis: 0});
 
     const droneArgs: SphereArgs = [droneSize];
 
@@ -48,17 +55,36 @@ export default function Drone(props: IDroneProps) {
     }
 
     useFrame((state) => {
-        state.camera.position.y += controlState.forward * speed;
-        state.camera.position.y -= controlState.backward * speed;
-        state.camera.position.x += controlState.right * speed;
-        state.camera.position.x -= controlState.left * speed;
+        // state.camera.position.y += controlState.forward * speed;
+        // state.camera.position.y -= controlState.backward * speed;
+        // state.camera.position.x += controlState.right * speed;
+        // state.camera.position.x -= controlState.left * speed;
 
-        const newDronePosition = new Vector3(state.camera.position.x, state.camera.position.y, 0);
+        const diff = new Vector3(gamepadState.xAxis, -gamepadState.yAxis, 0).multiplyScalar(speed);
+        const newCamPos = state.camera.position.clone().add(diff);
+        state.camera.position.copy(newCamPos);
+
+        const newDronePosition = new Vector3(newCamPos.x, newCamPos.y, 0);
         droneApi.position.copy(newDronePosition);
-
     });
 
+    function pollGamepad(timestamp: number) {
+        const gamepads = navigator.getGamepads().filter(g => g != null);
+        
+        if (gamepads.length > 0) {
+            const gamepad = gamepads[0];
+            const xAxis = gamepad!.axes[0] as number;
+            const yAxis = gamepad!.axes[1] as number;
+
+            setGamepadState({xAxis, yAxis});
+        }
+        
+
+        requestAnimationFrame(pollGamepad);
+    }
+
     useEffect(() => {
+        pollGamepad(0);
         window.addEventListener("keydown", (event) => {
             if (event.key === "w") {
                 setControlState({forward: 1, backward: controlState.backward, right: controlState.right, left: controlState.left});
