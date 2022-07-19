@@ -1,3 +1,4 @@
+import { useThree } from "@react-three/fiber";
 import { useEffect, useState } from "react";
 import IWallProps from "./IWallProps";
 import Wall from "./Wall";
@@ -9,12 +10,14 @@ const minPathWidth = 0.5;
 
 interface IMapProps {
     initialWallParams: IWallProps;
+    wallLayerNumber: number;
+    hideWalls: boolean;
 }
 
 export default function GameMap(props: IMapProps) {
-
     
     const [wallComponents, setWallComponents] = useState<JSX.Element[]>([]);
+    const threeState = useThree();
     
     useEffect(() => {
         if (wallComponents.length > 0) {
@@ -32,6 +35,14 @@ export default function GameMap(props: IMapProps) {
 
         setWallComponents(_wallComponents);
     }, [props.initialWallParams]);
+
+    useEffect(() => {
+        if (!props.hideWalls) {
+            threeState.camera.layers.enable(props.wallLayerNumber);
+        } else {
+            threeState.camera.layers.disable(props.wallLayerNumber);
+        }
+    }, [props.hideWalls]);
 
     return (<mesh>{wallComponents}</mesh>);
 }

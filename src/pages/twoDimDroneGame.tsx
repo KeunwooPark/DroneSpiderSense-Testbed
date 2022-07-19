@@ -10,7 +10,7 @@ import GameMap from "../components/GameMap";
 const wallLayerNumber = 1;
 
 interface IDroneControlProps {
-    hideWalls: boolean;
+    wallLayerNumber: number;
 }
 
 function DroneControl(props: IDroneControlProps) {
@@ -54,12 +54,12 @@ function DroneControl(props: IDroneControlProps) {
     }
 
     useFrame((state) => {
-        if (!props.hideWalls) {
-            state.camera.layers.enable(wallLayerNumber);
-        } else {
-            console.log()
-            state.camera.layers.disable(wallLayerNumber);
-        }
+        // if (!props.hideWalls) {
+        //     state.camera.layers.enable(wallLayerNumber);
+        // } else {
+        //     console.log()
+        //     state.camera.layers.disable(wallLayerNumber);
+        // }
         state.camera.position.y += controlState.forward * speed;
         state.camera.position.y -= controlState.backward * speed;
         state.camera.position.x += controlState.right * speed;
@@ -76,7 +76,7 @@ function DroneControl(props: IDroneControlProps) {
         setDroneWorldPosition(droneWorldPosition.clone());
         const raycaster = state.raycaster;
         raycaster.camera = state.camera;
-        raycaster.layers.set(wallLayerNumber);
+        raycaster.layers.set(props.wallLayerNumber);
 
         for (const ref of probeRefs) {
             const probeMesh = ref.current as Mesh;
@@ -194,8 +194,8 @@ const TwoDimDroneGame: NextPage = () => {
                         {/* <primitive object={new THREE.AxesHelper(10)} /> */}
                         {/* <OrbitControls /> */}
                         <ambientLight />
-                        <DroneControl hideWalls={hideWalls} />
-                        <GameMap initialWallParams={initialWallParams} />
+                        <DroneControl wallLayerNumber={wallLayerNumber} />
+                        <GameMap initialWallParams={initialWallParams} hideWalls={hideWalls} wallLayerNumber={wallLayerNumber} />
                     </Physics>
                 </Canvas>
             </div>
