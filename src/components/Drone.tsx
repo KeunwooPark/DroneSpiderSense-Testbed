@@ -8,6 +8,8 @@ import DistanceSensor from "./DistanceSensor";
 interface IDroneProps {
     wallLayerNumber: number;
     hideRays: boolean;
+    showAngleRange: boolean;
+    onlyFrontSensor: boolean;
 }
 
 interface IGamepadState {
@@ -84,18 +86,18 @@ export default function Drone(props: IDroneProps) {
                                                 wallLayerNumber={props.wallLayerNumber} 
                                                 direction={direction} 
                                                 showRaycastLine={!props.hideRays} 
-                                                showAngleRange={false}
+                                                showAngleRange={props.showAngleRange}
                                                 angleRange={2 * Math.PI / numProbes} />);
         }
         
         setDistanceSensors(distanceSensors);
-    }, [props.wallLayerNumber, props.hideRays]);
+    }, [props.wallLayerNumber, props.hideRays, props.showAngleRange]);
 
     return (<>
                 <mesh ref={droneRef}>
                     <sphereGeometry args={droneArgs}/>
                     <meshBasicMaterial attach="material" color={droneCollilde? "red" : "blue"} />
-                    {distanceSensors}
+                    {props.onlyFrontSensor? distanceSensors[2] : distanceSensors}
                 </mesh>
                 {/* <RayCastLineGroup center={droneWorldPosition} points={raycastHitPoints} /> */}
             </>);

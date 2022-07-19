@@ -14,6 +14,8 @@ const camZoomLevel = 150;
 const TwoDimDroneGame: NextPage = () => {
     const [hideWalls, setHideWalls] = useState(false);
     const [hideRays, setHideRays] = useState(false);
+    const [showAngleRange, setShowAngleRange] = useState(false);
+    const [onlyFrontSensor, setOnlyFrontSensor] = useState(false);
     const initialWallParams = {maxWidth: 6, thickness: 0.3, pathCenter: 0, pathWidth: 0, distance: 0, minPathWidth: 0.3, layerNumber: wallLayerNumber };
 
     function handleHideWallsChange() {
@@ -22,6 +24,14 @@ const TwoDimDroneGame: NextPage = () => {
 
     function handleHideRaysChange() {
         setHideRays(!hideRays);
+    }
+
+    function handleShowAngleRangeChange() {
+        setShowAngleRange(!showAngleRange);
+    }
+
+    function handleOnlyFrontSensorChange() {
+        setOnlyFrontSensor(!onlyFrontSensor);
     }
 
     return (
@@ -36,6 +46,16 @@ const TwoDimDroneGame: NextPage = () => {
                 <div>rays</div> 
                 <input type="checkbox" className="toggle" checked={!hideRays} onChange={handleHideRaysChange} />
             </div>
+
+            <div className="ml-3">
+                <div>angleRange</div> 
+                <input type="checkbox" className="toggle" checked={showAngleRange} onChange={handleShowAngleRangeChange} />
+            </div>
+
+            <div className="ml-3">
+                <div>show only front sensor</div> 
+                <input type="checkbox" className="toggle" checked={onlyFrontSensor} onChange={handleOnlyFrontSensorChange} />
+            </div>
             
             {/* <button className="btn btn-primary" onClick={handleHideWallsClick}>{hideWalls? "show walls" : "hide walls"}</button> */}
             <div className="w-1/2 h-1/2">
@@ -45,7 +65,7 @@ const TwoDimDroneGame: NextPage = () => {
                         {/* <primitive object={new THREE.AxesHelper(10)} /> */}
                         {/* <OrbitControls /> */}
                         <ambientLight />
-                        <Drone wallLayerNumber={wallLayerNumber} hideRays={hideRays} />
+                        <Drone wallLayerNumber={wallLayerNumber} hideRays={hideRays} showAngleRange={showAngleRange} onlyFrontSensor={onlyFrontSensor} />
                         <GameMap initialWallParams={initialWallParams} hideWalls={hideWalls} wallLayerNumber={wallLayerNumber} />
                     </Physics>
                 </Canvas>

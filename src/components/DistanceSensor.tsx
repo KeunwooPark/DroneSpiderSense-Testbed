@@ -47,11 +47,10 @@ export default function DistanceSensor(props: IDistanceSensorProps) {
         setRaycaster(raycaster);
 
         const subDirections: Vector3[] = [];
-        const angleRange = props.angleRange / numSubRays;
 
         const zAxis = new Vector3(0, 0, 1);
-        const midAngle = angleRange / 2;
-        const angleStep = angleRange / (numSubRays - 1);
+        const midAngle = props.angleRange / 2;
+        const angleStep = props.angleRange / (numSubRays - 1);
         const startingDirection = props.direction.clone().applyAxisAngle(zAxis, -midAngle);
         
         for (let i = 0; i < numSubRays; i++) {
