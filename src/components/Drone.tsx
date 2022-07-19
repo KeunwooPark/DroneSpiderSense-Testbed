@@ -14,7 +14,7 @@ export default function Drone(props: IDroneProps) {
     const speed = 0.02;
     const probDist = 0.3;
     const numProbes = 8;
-    const droneSize = 0.15;
+    const droneSize = 0.1;
     const [controlState, setControlState] = useState({forward: 0, backward: 0, right: 0, left: 0});
     const [droneCollilde, setDroneCollilde] = useState(false);
 
@@ -28,23 +28,11 @@ export default function Drone(props: IDroneProps) {
                                                         onCollideBegin: (e) => {setDroneCollilde(true)},
                                                         onCollideEnd: (e) => {setDroneCollilde(false)},
                                                     }));
-    const probes: JSX.Element[] = [];
-    const probeRefs: any[] = [];
-    const sensorDirections: Vector3[] = [];
-
-    for (let i = 0; i < numProbes; i++) {
-        const angle = i * Math.PI / 4;
-        const x = Math.cos(angle) * probDist;
-        const y = Math.sin(angle) * probDist;
-        const direction = new Vector3(x, y, 0);
-        direction.normalize();
-        sensorDirections.push(direction);
-    }
 
     const distanceSensors: JSX.Element[] = [];
 
     for (let i = 0; i < numProbes; i++) {
-        const angle = i * Math.PI / 4;
+        const angle = i * (2 * Math.PI / numProbes);
         const x = Math.cos(angle) * probDist;
         const y = Math.sin(angle) * probDist;
         const direction = new Vector3(x, y, 0);
@@ -55,6 +43,7 @@ export default function Drone(props: IDroneProps) {
                                             wallLayerNumber={props.wallLayerNumber} 
                                             direction={direction} 
                                             showRaycastLine={true} 
+                                            showAngleRange={false}
                                             angleRange={2 * Math.PI / numProbes} />);
     }
 
