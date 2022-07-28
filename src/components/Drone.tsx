@@ -3,13 +3,16 @@ import { Line, Sphere } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useEffect, useRef, useState } from "react";
 import { Mesh, Vector3 } from "three";
+import { distanceToIntensity } from "../utils/hapticRenderer";
 import DistanceSensor from "./DistanceSensor";
+import IHapticPacket from "./IHapticPacket";
 
 interface IDroneProps {
     wallLayerNumber: number;
     hideRays: boolean;
     showAngleRange: boolean;
     onlyFrontSensor: boolean;
+    hapticPacketQueue: IHapticPacket[];
 }
 
 interface IGamepadState {
@@ -22,12 +25,11 @@ export default function Drone(props: IDroneProps) {
     const speed = 0.02;
     const probDist = 0.3;
     const numProbes = 8;
+    const sensorPollInterval = 10;
     const droneSize = 0.1;
-    const [controlState, setControlState] = useState({forward: 0, backward: 0, right: 0, left: 0});
     const [droneCollilde, setDroneCollilde] = useState(false);
 
     const [gamepadState, setGamepadState] = useState<IGamepadState>({xAxis: 0, yAxis: 0});
-
     const [distanceSensors, setDistanceSensors] = useState<JSX.Element[]>([]);
 
     const droneArgs: SphereArgs = [droneSize];
@@ -82,16 +84,29 @@ export default function Drone(props: IDroneProps) {
             direction.normalize();
             
             distanceSensors.push(<DistanceSensor key={`sensor-${i}`} 
+                                                id={i}
                                                 droneRef={droneRef} 
                                                 wallLayerNumber={props.wallLayerNumber} 
                                                 direction={direction} 
                                                 showRaycastLine={!props.hideRays} 
                                                 showAngleRange={props.showAngleRange}
-                                                angleRange={2 * Math.PI / numProbes} />);
+                                                angleRange={2 * Math.PI / numProbes}
+                                                pollInterval={sensorPollInterval} 
+                                                onDistanceChange={onSensorDistanceChange}/>);
         }
         
         setDistanceSensors(distanceSensors);
     }, [props.wallLayerNumber, props.hideRays, props.showAngleRange]);
+
+    function onSensorDistanceChange(id: number, distance: number) {
+
+        if (props.hapticPacketQueue == null) {
+            return;
+        }
+
+        const intensity = distanceToIntensity(distance);
+        props.hapticPacketQueue.push({actuatorID: id, intensity});
+    }
 
     return (<>
                 <mesh ref={droneRef}>
@@ -99,6 +114,5 @@ export default function Drone(props: IDroneProps) {
                     <meshBasicMaterial attach="material" color={droneCollilde? "red" : "blue"} />
                     {props.onlyFrontSensor? distanceSensors[2] : distanceSensors}
                 </mesh>
-                {/* <RayCastLineGroup center={droneWorldPosition} points={raycastHitPoints} /> */}
             </>);
 }

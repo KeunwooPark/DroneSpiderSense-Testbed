@@ -23,26 +23,29 @@ export default function SerialCom(props: ISerialComProps) {
     }, []);
 
     useInterval(async () => {
-        const packet = props.hapticPacketQueue.shift();
-        
-        if (packet) {
-            if (debug) {
+
+        while (props.hapticPacketQueue.length > 0) {
+            const packet = props.hapticPacketQueue.shift();
+            if (packet) {
+                if (debug) {
+                    console.log("Sent: " + packet.actuatorID + " " + packet.intensity);
+                    return;
+                }
+                
+                const data = new Uint8Array([packet.actuatorID, packet.intensity]);
+    
+                if (serialPort == null || serialPort.writable == null || serialPort.writable.locked) {
+                    console.error("Serial port not ready", serialPort?.writable);
+                    return;
+                }
+    
+                const writer = serialPort.writable.getWriter();
+                await writer.write(data);
+                writer.releaseLock();
                 console.log("Sent: " + packet.actuatorID + " " + packet.intensity);
-                return;
             }
-            
-            const data = new Uint8Array([packet.actuatorID, packet.intensity]);
-
-            if (serialPort == null || serialPort.writable == null || serialPort.writable.locked) {
-                console.error("Serial port not ready", serialPort?.writable);
-                return;
-            }
-
-            const writer = serialPort.writable.getWriter();
-            await writer.write(data);
-            writer.releaseLock();
-            console.log("Sent: " + packet.actuatorID + " " + packet.intensity);
         }
+
         
     }, props.pollInterval);
 

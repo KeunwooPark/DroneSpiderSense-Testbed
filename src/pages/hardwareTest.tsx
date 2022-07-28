@@ -7,7 +7,6 @@ import SerialCom from "../components/SerialCom";
 const HardwareTest: NextPage = () => {
     
     const numActuators = 8;
-    const [port, setPort] = useState<SerialPort>();
     const [hapticPacketQueue, setHapticPacketQueue] = useState<IHapticPacket[]>([]);
     const [controlState, setControlState] = useState<IHapticPacket>({actuatorID: 0, intensity: 0});
 

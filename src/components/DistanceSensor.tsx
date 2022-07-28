@@ -2,7 +2,9 @@ import { Line, Sphere } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { getMaxListeners } from "process";
 import { RefObject, useEffect, useState } from "react";
+import useInterval from "react-useinterval";
 import { Intersection, Mesh, Object3D, Raycaster, Scene, Vector3 } from "three";
+import { distanceToSize } from "../utils/hapticRenderer";
 
 interface IDistanceSensorProps {
     droneRef: RefObject<Mesh>;
@@ -11,25 +13,13 @@ interface IDistanceSensorProps {
     angleRange: number;
     showRaycastLine: boolean;
     showAngleRange: boolean;
+    id: number;
+    pollInterval: number;
+    onDistanceChange: (id: number, distance: number) => void;
 }
 
 const distanceFromDrone = 0.3;
 const numSubRays = 5;
-const minSize = 0.02;
-const maxSize = 0.15;
-const maxDistance = 2;
-
-function distanceToSize(distance: number) {
-    const reverseDistance = maxDistance - distance;
-    
-    if (reverseDistance < 0) {
-        return minSize;
-    }
-
-    const size = maxSize * reverseDistance / maxDistance;
-
-    return Math.min(size, maxSize);
-}
 
 export default function DistanceSensor(props: IDistanceSensorProps) {
 
@@ -80,14 +70,12 @@ export default function DistanceSensor(props: IDistanceSensorProps) {
         }
 
         const drone = props.droneRef.current as Mesh;
-        
-        const droneWorldPosition = new Vector3();
-        drone.getWorldPosition(droneWorldPosition);
-        
-        const {hitDistance, hitDirection} = raycastInAngleRange(raycaster, droneWorldPosition, subDirections, props.angleRange, state.scene);
+    
+        const {hitDistance, hitDirection} = raycast(drone, state.scene, raycaster);
         const raycastHitPoint = hitDirection.clone().multiplyScalar(hitDistance);
 
         setRaycastHitDistance(hitDistance);
+        
         const isHit = hitDistance < Infinity;
         setIsHit(isHit);
 
@@ -97,6 +85,18 @@ export default function DistanceSensor(props: IDistanceSensorProps) {
             setRaycastHitPoint(new Vector3(0, 0, 0));
         }
     });
+
+    useInterval(() => {
+        props.onDistanceChange(props.id, raycastHitDistance);
+    }, props.pollInterval);
+
+    function raycast(drone: Mesh, scene: Scene, raycaster: Raycaster): {hitDistance: number, hitDirection: Vector3} {
+        const droneWorldPosition = new Vector3();
+        drone.getWorldPosition(droneWorldPosition);
+        
+        const {hitDistance, hitDirection} = raycastInAngleRange(raycaster, droneWorldPosition, subDirections, props.angleRange, scene);
+        return {hitDistance, hitDirection};
+    }
 
     function getLine() {
         if(props.showRaycastLine && isHit) {
