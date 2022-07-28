@@ -7,7 +7,8 @@ import SerialCom from "../components/SerialCom";
 const HardwareTest: NextPage = () => {
     
     const numActuators = 8;
-    const hapticPacketQueue: IHapticPacket[] = [];
+    const [port, setPort] = useState<SerialPort>();
+    const [hapticPacketQueue, setHapticPacketQueue] = useState<IHapticPacket[]>([]);
     const [controlState, setControlState] = useState<IHapticPacket>({actuatorID: 0, intensity: 0});
 
     useEffect(() => {
@@ -39,8 +40,8 @@ const HardwareTest: NextPage = () => {
 
     return (
         <div className="container mx-auto">
-            <div>Hardware Test view</div>
-            <SerialCom pollInterval={10} hapticPacketQueue={hapticPacketQueue} baudRate={115200} />
+            <h1 className="text-3xl my-5">Hardware Test view</h1>
+            <SerialCom pollInterval={2} hapticPacketQueue={hapticPacketQueue} baudRate={115200} />
             <div className="form-control mt-3">
                 <label>Actuator ID</label>
                 <select className="select select-primary w-full max-w-xs" onChange={onActuatorIDSelectChange}>

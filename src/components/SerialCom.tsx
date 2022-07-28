@@ -21,11 +21,21 @@ export default function SerialCom(props: ISerialComProps) {
           }
     }, []);
 
-    useInterval(() => {
+    useInterval(async () => {
         const packet = props.hapticPacketQueue.shift();
+        
         if (packet) {
-            const data = new Int8Array([packet.actuatorID, packet.intensity]);
-            console.log(data);
+            const data = new Uint8Array([packet.actuatorID, packet.intensity]);
+
+            if (serialPort == null || serialPort.writable == null || serialPort.writable.locked) {
+                console.error("Serial port not ready", serialPort?.writable);
+                return;
+            }
+
+            const writer = serialPort.writable.getWriter();
+            await writer.write(data);
+            writer.releaseLock();
+            console.log("Sent: " + packet.actuatorID + " " + packet.intensity);
         }
         
     }, props.pollInterval);
