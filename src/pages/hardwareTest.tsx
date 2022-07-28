@@ -41,7 +41,7 @@ const HardwareTest: NextPage = () => {
     return (
         <div className="container mx-auto">
             <h1 className="text-3xl my-5">Hardware Test view</h1>
-            <SerialCom pollInterval={2} hapticPacketQueue={hapticPacketQueue} baudRate={115200} />
+            <SerialCom pollInterval={2} hapticPacketQueue={hapticPacketQueue} baudRate={115200} debug={false} />
             <div className="form-control mt-3">
                 <label>Actuator ID</label>
                 <select className="select select-primary w-full max-w-xs" onChange={onActuatorIDSelectChange}>

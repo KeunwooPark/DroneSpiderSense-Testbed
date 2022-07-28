@@ -7,6 +7,7 @@ export interface ISerialComProps {
     hapticPacketQueue: IHapticPacket[];
     pollInterval: number;
     baudRate: number;
+    debug: boolean;
 }
 
 export default function SerialCom(props: ISerialComProps) {
@@ -25,6 +26,11 @@ export default function SerialCom(props: ISerialComProps) {
         const packet = props.hapticPacketQueue.shift();
         
         if (packet) {
+            if (props.debug) {
+                console.log("Sent: " + packet.actuatorID + " " + packet.intensity);
+                return;
+            }
+            
             const data = new Uint8Array([packet.actuatorID, packet.intensity]);
 
             if (serialPort == null || serialPort.writable == null || serialPort.writable.locked) {
