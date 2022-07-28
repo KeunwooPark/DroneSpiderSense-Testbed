@@ -7,7 +7,6 @@ export interface ISerialComProps {
     hapticPacketQueue: IHapticPacket[];
     pollInterval: number;
     baudRate: number;
-    debug: boolean;
 }
 
 export default function SerialCom(props: ISerialComProps) {
@@ -15,6 +14,7 @@ export default function SerialCom(props: ISerialComProps) {
     const baudRate = props.baudRate;
     const [errorState, setErrorState] = useState<IAlertProps>({show: false, message: ""});
     const [serialPort, setSerialPort] = useState<SerialPort>();
+    const [debug, setDebug] = useState(false);
 
     useEffect(() => {
         if (!("serial" in navigator)) {
@@ -26,7 +26,7 @@ export default function SerialCom(props: ISerialComProps) {
         const packet = props.hapticPacketQueue.shift();
         
         if (packet) {
-            if (props.debug) {
+            if (debug) {
                 console.log("Sent: " + packet.actuatorID + " " + packet.intensity);
                 return;
             }
@@ -73,9 +73,19 @@ export default function SerialCom(props: ISerialComProps) {
         setErrorState({show: false, message: ""});
     }
 
-    return (<div>
-        <button className="btn btn-primary" onClick={connect}>connect</button>
+    function toggleDebug() {
+        setDebug(!debug);
+    }
+
+    return (<div className="">
+        <button className="btn btn-primary m-3" onClick={connect}>connect</button>
         <button className="btn btn-primary" onClick={disconnect}>disconnect</button>
+        <div className="form-control max-width">
+            <label className="label cursor-pointer">
+                <span className="label-text">debug</span>
+                <input type="checkbox" className="toggle toggle-primary" checked={debug} onChange={toggleDebug} />
+            </label>
+        </div>
         <Alert {...errorState} />
     </div>);
 }

@@ -1,12 +1,11 @@
-import { Debug, Physics, SphereArgs, Triplet, useBox, useSphere } from "@react-three/cannon";
-import { Line, Sphere, useHelper } from "@react-three/drei";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Physics } from "@react-three/cannon";
+import { Canvas } from "@react-three/fiber";
 import { NextPage } from "next"
-import { useEffect, useRef, useState } from "react";
-import * as THREE from "three";
-import { BoxHelper, Mesh, Vector3 } from "three";
+import { useState } from "react";
 import Drone from "../components/Drone";
 import GameMap from "../components/GameMap";
+import SerialCom from "../components/SerialCom";
+import IHapticPacket from "../components/IHapticPacket";
 
 const wallLayerNumber = 1;
 const camZoomLevel = 150;
@@ -17,6 +16,7 @@ const TwoDimDroneGame: NextPage = () => {
     const [showAngleRange, setShowAngleRange] = useState(false);
     const [onlyFrontSensor, setOnlyFrontSensor] = useState(false);
     const initialWallParams = {maxWidth: 6, thickness: 0.3, pathCenter: 0, pathWidth: 0, distance: 0, minPathWidth: 0.3, layerNumber: wallLayerNumber };
+    const [hapticPacketQueue, setHapticPacketQueue] = useState<IHapticPacket[]>([]);
 
     function handleHideWallsChange() {
         setHideWalls(!hideWalls);
@@ -35,7 +35,7 @@ const TwoDimDroneGame: NextPage = () => {
     }
 
     return (
-        <div className="h-screen">
+        <div className="container mx-auto h-screen">
             <h1 className="text-5xl">TwoDimDroneGame</h1>
             <div className="ml-3">
                 <div>walls</div> 
@@ -57,13 +57,12 @@ const TwoDimDroneGame: NextPage = () => {
                 <input type="checkbox" className="toggle" checked={onlyFrontSensor} onChange={handleOnlyFrontSensorChange} />
             </div>
             
-            {/* <button className="btn btn-primary" onClick={handleHideWallsClick}>{hideWalls? "show walls" : "hide walls"}</button> */}
+            <SerialCom pollInterval={2} hapticPacketQueue={hapticPacketQueue} baudRate={115200} />
+            
             <div className="w-1/2 h-1/2">
                 <Canvas className="" camera={{position: [0, 0, 1], zoom: camZoomLevel}} orthographic>
                     <color args={["#000000"]} attach="background" />
                     <Physics>
-                        {/* <primitive object={new THREE.AxesHelper(10)} /> */}
-                        {/* <OrbitControls /> */}
                         <ambientLight />
                         <Drone wallLayerNumber={wallLayerNumber} hideRays={hideRays} showAngleRange={showAngleRange} onlyFrontSensor={onlyFrontSensor} />
                         <GameMap initialWallParams={initialWallParams} hideWalls={hideWalls} wallLayerNumber={wallLayerNumber} />
