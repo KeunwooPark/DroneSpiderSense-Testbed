@@ -23,6 +23,7 @@
     "react": "18.1.0",
     "react-dom": "18.1.0",
     "react-query": "^3.39.0",
+    "react-useinterval": "^1.0.2",
     "serialport": "^10.4.0",
     "three": "^0.142.0",
     "use-cannon": "^0.5.3",
