@@ -13,25 +13,30 @@ const camZoomLevel = 150;
 const TwoDimDroneGame: NextPage = () => {
     const [hideWalls, setHideWalls] = useState(false);
     const [hideRays, setHideRays] = useState(false);
+    const [hideSpheres, setHideSpheres] = useState(false);
     const [showAngleRange, setShowAngleRange] = useState(false);
     const [onlyFrontSensor, setOnlyFrontSensor] = useState(false);
     const initialWallParams = {maxWidth: 6, thickness: 0.3, pathCenter: 0, pathWidth: 0, distance: 0, minPathWidth: 0.3, layerNumber: wallLayerNumber };
     const [hapticPacketQueue, setHapticPacketQueue] = useState<IHapticPacket[]>([]);
 
-    function handleHideWallsChange() {
+    function hideWallsChanged() {
         setHideWalls(!hideWalls);
     }
 
-    function handleHideRaysChange() {
+    function hideRaysChanged() {
         setHideRays(!hideRays);
     }
 
-    function handleShowAngleRangeChange() {
+    function showAngleRangeChanged() {
         setShowAngleRange(!showAngleRange);
     }
 
-    function handleOnlyFrontSensorChange() {
+    function onlyFrontSensorChanged() {
         setOnlyFrontSensor(!onlyFrontSensor);
+    }
+
+    function hideSpheresChanged() {
+        setHideSpheres(!hideSpheres);
     }
 
     return (
@@ -39,22 +44,27 @@ const TwoDimDroneGame: NextPage = () => {
             <h1 className="text-5xl">TwoDimDroneGame</h1>
             <div className="ml-3">
                 <div>walls</div> 
-                <input type="checkbox" className="toggle" checked={!hideWalls} onChange={handleHideWallsChange} />
+                <input type="checkbox" className="toggle" checked={!hideWalls} onChange={hideWallsChanged} />
             </div>
 
             <div className="ml-3">
                 <div>rays</div> 
-                <input type="checkbox" className="toggle" checked={!hideRays} onChange={handleHideRaysChange} />
+                <input type="checkbox" className="toggle" checked={!hideRays} onChange={hideRaysChanged} />
+            </div>
+
+            <div className="ml-3">
+                <div>spheres</div> 
+                <input type="checkbox" className="toggle" checked={!hideSpheres} onChange={hideSpheresChanged} />
             </div>
 
             <div className="ml-3">
                 <div>angleRange</div> 
-                <input type="checkbox" className="toggle" checked={showAngleRange} onChange={handleShowAngleRangeChange} />
+                <input type="checkbox" className="toggle" checked={showAngleRange} onChange={showAngleRangeChanged} />
             </div>
 
             <div className="ml-3">
                 <div>show only front sensor</div> 
-                <input type="checkbox" className="toggle" checked={onlyFrontSensor} onChange={handleOnlyFrontSensorChange} />
+                <input type="checkbox" className="toggle" checked={onlyFrontSensor} onChange={onlyFrontSensorChanged} />
             </div>
             
             <SerialCom pollInterval={2} hapticPacketQueue={hapticPacketQueue} baudRate={115200} />
@@ -64,7 +74,7 @@ const TwoDimDroneGame: NextPage = () => {
                     <color args={["#000000"]} attach="background" />
                     <Physics>
                         <ambientLight />
-                        <Drone wallLayerNumber={wallLayerNumber} hideRays={hideRays} showAngleRange={showAngleRange} onlyFrontSensor={onlyFrontSensor} hapticPacketQueue={hapticPacketQueue} />
+                        <Drone wallLayerNumber={wallLayerNumber} hideRays={hideRays} showAngleRange={showAngleRange} onlyFrontSensor={onlyFrontSensor} hapticPacketQueue={hapticPacketQueue} hideSpheres={hideSpheres} />
                         <GameMap initialWallParams={initialWallParams} hideWalls={hideWalls} wallLayerNumber={wallLayerNumber} />
                     </Physics>
                 </Canvas>

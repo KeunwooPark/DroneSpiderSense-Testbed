@@ -13,6 +13,7 @@ interface IDistanceSensorProps {
     angleRange: number;
     showRaycastLine: boolean;
     showAngleRange: boolean;
+    showSphere: boolean;
     id: number;
     pollInterval: number;
     onDistanceChange: (id: number, distance: number) => void;
@@ -107,6 +108,11 @@ export default function DistanceSensor(props: IDistanceSensorProps) {
     }
 
     function getSphere() {
+
+        if (!props.showSphere) {
+            return <></>;
+        }
+
         if(isHit) {
             const size = distanceToSize(raycastHitDistance);
             return <Sphere args={[size]} position={props.direction.clone().multiplyScalar(distanceFromDrone)}> 

@@ -12,6 +12,7 @@ interface IDroneProps {
     hideRays: boolean;
     showAngleRange: boolean;
     onlyFrontSensor: boolean;
+    hideSpheres: boolean;
     hapticPacketQueue: IHapticPacket[];
 }
 
@@ -92,12 +93,13 @@ export default function Drone(props: IDroneProps) {
                                                 showRaycastLine={!props.hideRays} 
                                                 showAngleRange={props.showAngleRange}
                                                 angleRange={2 * Math.PI / numProbes}
-                                                pollInterval={sensorPollInterval} 
+                                                pollInterval={sensorPollInterval}
+                                                showSphere={!props.hideSpheres}
                                                 onDistanceChange={onSensorDistanceChange}/>);
         }
         
         setDistanceSensors(distanceSensors);
-    }, [props.wallLayerNumber, props.hideRays, props.showAngleRange]);
+    }, [props.wallLayerNumber, props.hideRays, props.showAngleRange, props.hideSpheres]);
 
     function onSensorDistanceChange(id: number, distance: number) {
 
