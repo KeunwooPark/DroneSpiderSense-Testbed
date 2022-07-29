@@ -25,7 +25,7 @@ export default function Drone(props: IDroneProps) {
     const speed = 0.02;
     const probDist = 0.3;
     const numProbes = 8;
-    const sensorPollInterval = 10;
+    const sensorPollInterval = 100;
     const droneSize = 0.1;
     const [droneCollilde, setDroneCollilde] = useState(false);
 
@@ -76,8 +76,9 @@ export default function Drone(props: IDroneProps) {
 
     useEffect(function setSensors() {
         const distanceSensors: JSX.Element[] = [];
+        const angleOffset = -Math.PI / 2;
         for (let i = 0; i < numProbes; i++) {
-            const angle = i * (2 * Math.PI / numProbes);
+            const angle = i * (2 * Math.PI / numProbes) + angleOffset;
             const x = Math.cos(angle) * probDist;
             const y = Math.sin(angle) * probDist;
             const direction = new Vector3(x, y, 0);
@@ -112,7 +113,7 @@ export default function Drone(props: IDroneProps) {
                 <mesh ref={droneRef}>
                     <sphereGeometry args={droneArgs}/>
                     <meshBasicMaterial attach="material" color={droneCollilde? "red" : "blue"} />
-                    {props.onlyFrontSensor? distanceSensors[2] : distanceSensors}
+                    {props.onlyFrontSensor? distanceSensors[4] : distanceSensors}
                 </mesh>
             </>);
 }
