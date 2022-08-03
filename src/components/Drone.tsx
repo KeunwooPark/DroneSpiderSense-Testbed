@@ -23,20 +23,22 @@ interface IDroneProps {
 interface IGamepadState {
     xAxis: number;
     yAxis: number;
+    yaw: number;
 }
 
 const camZoomLevel = 150;
 
 export default function Drone(props: IDroneProps) {
 
-    const speed = 0.02;
+    const speed = 0.5;
+    const rotationSpeed = MathUtils.degToRad(10);
     const probDist = 0.3;
     const numProbes = 8;
     const sensorPollInterval = 100;
     const droneSize = 0.1;
     const [droneCollilde, setDroneCollilde] = useState(false);
 
-    const [gamepadState, setGamepadState] = useState<IGamepadState>({xAxis: 0, yAxis: 0});
+    const [gamepadState, setGamepadState] = useState<IGamepadState>({xAxis: 0, yAxis: 0, yaw: 0});
     const [distanceSensors, setDistanceSensors] = useState<JSX.Element[]>([]);
 
     const droneArgs: SphereArgs = [droneSize];
@@ -53,18 +55,14 @@ export default function Drone(props: IDroneProps) {
 
     useFrame((state) => {
 
-        const diff = new Vector3(gamepadState.xAxis, -gamepadState.yAxis, 0).multiplyScalar(speed);
+        const translateSpeed = new Vector3(gamepadState.xAxis, -gamepadState.yAxis, 0).multiplyScalar(speed);
         
-        if (droneRef.current == null) {
-            return;
-        }
+        // const newDronePosition = new Vector3(newPosition.x, newPosition.y, 0);
+        // droneApi.position.copy(newDronePosition);
+        droneApi.velocity.set(translateSpeed.x, translateSpeed.y, translateSpeed.z);
 
-        const newPosition = new Vector3();
-        droneRef.current.getWorldPosition(newPosition);
-        newPosition.add(diff);
-
-        const newDronePosition = new Vector3(newPosition.x, newPosition.y, 0);
-        droneApi.position.copy(newDronePosition);
+        const rotationDiff = gamepadState.yaw * speed;
+        droneApi.angularVelocity.set(0, 0, rotationDiff);
     });
 
     function pollGamepad(timestamp: number) {
@@ -75,7 +73,8 @@ export default function Drone(props: IDroneProps) {
             const xAxis = gamepad!.axes[0] as number;
             const yAxis = gamepad!.axes[1] as number;
 
-            setGamepadState({xAxis, yAxis});
+            const yaw = gamepad!.axes[2] as number;
+            setGamepadState({xAxis, yAxis, yaw});
         }
         
 
