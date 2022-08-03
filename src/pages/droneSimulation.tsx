@@ -7,6 +7,7 @@ import GameMap from "../components/GameMap";
 import SerialCom from "../components/SerialCom";
 import IHapticPacket from "../components/IHapticPacket";
 import { OrthographicCamera } from "@react-three/drei";
+import MapGenerator from "../components/MapGenerator";
 
 const wallLayerNumber = 1;
 const camZoomLevel = 150;
@@ -90,6 +91,9 @@ const DroneSimulation: NextPage = () => {
                         <GameMap initialWallParams={initialWallParams} hideWalls={hideWalls} wallLayerNumber={wallLayerNumber} />
                     </Physics>
                 </Canvas>
+            </div>
+            <div className="my-3">
+                <MapGenerator />
             </div>
         </div>
     )
