@@ -82,6 +82,7 @@ const DroneSimulation: NextPage = () => {
             
             <div className="w-1/2 h-1/2">
                 <Canvas className="">
+                    <fog attach="fog" color="black" near={0} far={5} />
                     <color args={["#000000"]} attach="background" />
                     <Physics>
                         {/* <ambientLight color={"#FFFFFF"} /> */}
