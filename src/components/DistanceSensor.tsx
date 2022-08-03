@@ -3,7 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import { getMaxListeners } from "process";
 import { RefObject, useEffect, useState } from "react";
 import useInterval from "react-useinterval";
-import { Intersection, Mesh, Object3D, Raycaster, Scene, Vector3 } from "three";
+import { Intersection, Mesh, Object3D, Raycaster, Scene, Vector, Vector3 } from "three";
 import { distanceToSize } from "../utils/hapticRenderer";
 
 interface IDistanceSensorProps {
@@ -25,7 +25,7 @@ const numSubRays = 5;
 export default function DistanceSensor(props: IDistanceSensorProps) {
 
     const [raycaster, setRaycaster] = useState<Raycaster>();
-    const origin = new Vector3();
+    const origin = new Vector3(0, 0, 0);
     const [raycastHitPoint, setRaycastHitPoint] = useState(new Vector3(0, 0, 0));
     const [raycastHitDistance, setRaycastHitDistance] = useState(Infinity);
     const [isHit, setIsHit] = useState(false);
@@ -72,6 +72,7 @@ export default function DistanceSensor(props: IDistanceSensorProps) {
 
         const drone = props.droneRef.current as Mesh;
     
+        // local coordinates
         const {hitDistance, hitDirection} = raycast(drone, state.scene, raycaster);
         const raycastHitPoint = hitDirection.clone().multiplyScalar(hitDistance);
 
@@ -92,10 +93,7 @@ export default function DistanceSensor(props: IDistanceSensorProps) {
     }, props.pollInterval);
 
     function raycast(drone: Mesh, scene: Scene, raycaster: Raycaster): {hitDistance: number, hitDirection: Vector3} {
-        const droneWorldPosition = new Vector3();
-        drone.getWorldPosition(droneWorldPosition);
-        
-        const {hitDistance, hitDirection} = raycastInAngleRange(raycaster, droneWorldPosition, subDirections, props.angleRange, scene);
+        const {hitDistance, hitDirection} = raycastInAngleRange(raycaster, drone, subDirections, scene);
         return {hitDistance, hitDirection};
     }
 
@@ -145,21 +143,31 @@ export default function DistanceSensor(props: IDistanceSensorProps) {
     </>;
 }
 
-function raycastInAngleRange(raycaster: Raycaster, droneWorldPos: Vector3, subDirections: Vector3[], angleRange: number, scene: Scene): {hitDistance: number, hitDirection: Vector3} {
+function raycastInAngleRange(raycaster: Raycaster, drone: Mesh, subDirections: Vector3[], scene: Scene): {hitDistance: number, hitDirection: Vector3} {
+    const droneWorldPos = new Vector3();
+    drone.getWorldPosition(droneWorldPos);
 
     let intersects: Intersection<Object3D>[] = [];
     for (const subDir of subDirections) {
-        raycaster.set(droneWorldPos.clone(), subDir.clone());
+        const subDirInWorld = drone.localToWorld(subDir.clone()).sub(droneWorldPos).normalize();
+        raycaster.set(droneWorldPos.clone(), subDirInWorld.clone());
         const subIntersects = raycaster.intersectObjects(scene.children);
         intersects = intersects.concat(subIntersects);
     }
 
-    if (intersects.length > 0) {
-        intersects.sort((a, b) => a.distance - b.distance);
-        const closestIntersect = intersects[0]!;
+    const intersectsAsLocal: {distance: number, point: Vector3}[] = intersects.map(intersect => {
+        const localIntersect = drone.worldToLocal(intersect.point.clone());
+        return {distance: localIntersect.length(), point: localIntersect};
+    });
+    intersectsAsLocal.sort((a, b) => a.distance - b.distance);
+
+    if (intersectsAsLocal.length > 0) {
+        const closestIntersect = intersectsAsLocal[0]!;
         if (closestIntersect.distance != null && closestIntersect?.distance < Infinity && closestIntersect?.point != null) {
-            const direction = closestIntersect.point.clone().sub(droneWorldPos).normalize();
-            return {hitDistance: closestIntersect.distance, hitDirection: direction};
+            const localDirection = closestIntersect.point.clone().normalize();
+            // const worldDirection = drone.localToWorld(localDirection);
+            // const localDirection = drone.worldToLocal(worldDirection);
+            return {hitDistance: closestIntersect.distance, hitDirection: localDirection};
         }
     }
 

@@ -37,7 +37,7 @@ export default function SerialCom(props: ISerialComProps) {
             }
             
             if (serialPort == null || serialPort.writable == null || serialPort.writable.locked) {
-                console.error("Serial port not ready", serialPort?.writable);
+                // console.error("Serial port not ready", serialPort?.writable);
                 return;
             }
             

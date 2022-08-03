@@ -26,7 +26,7 @@ interface IGamepadState {
     yaw: number;
 }
 
-const camZoomLevel = 150;
+const deadzone = 0.1;
 
 export default function Drone(props: IDroneProps) {
 
@@ -55,14 +55,21 @@ export default function Drone(props: IDroneProps) {
 
     useFrame((state) => {
 
-        const translateSpeed = new Vector3(gamepadState.xAxis, -gamepadState.yAxis, 0).multiplyScalar(speed);
-        
-        // const newDronePosition = new Vector3(newPosition.x, newPosition.y, 0);
-        // droneApi.position.copy(newDronePosition);
-        droneApi.velocity.set(translateSpeed.x, translateSpeed.y, translateSpeed.z);
+        if (droneRef.current == null) {
+            return;
+        }
 
-        const rotationDiff = gamepadState.yaw * speed;
-        droneApi.angularVelocity.set(0, 0, rotationDiff);
+        const drone = droneRef.current as Mesh;
+        const droneWorldPos = new Vector3();
+        droneRef.current?.getWorldPosition(droneWorldPos);
+
+        const translateVelocity = new Vector3(gamepadState.xAxis, -gamepadState.yAxis, 0).multiplyScalar(speed);
+        const translateVelocityInWorld = drone.localToWorld(translateVelocity.clone()).sub(droneWorldPos);
+        droneApi.velocity.set(translateVelocityInWorld.x, translateVelocityInWorld.y, translateVelocityInWorld.z);
+
+
+        const angularSpeed = - gamepadState.yaw * speed;
+        droneApi.angularVelocity.set(0, 0, angularSpeed);
     });
 
     function pollGamepad(timestamp: number) {
@@ -70,10 +77,13 @@ export default function Drone(props: IDroneProps) {
         
         if (gamepads.length > 0) {
             const gamepad = gamepads[0];
-            const xAxis = gamepad!.axes[0] as number;
-            const yAxis = gamepad!.axes[1] as number;
+            let xAxis = gamepad!.axes[0] as number;
+            let yAxis = gamepad!.axes[1] as number;
+            let yaw = gamepad!.axes[2] as number;
 
-            const yaw = gamepad!.axes[2] as number;
+            xAxis = applyDeadzone(xAxis, deadzone);
+            yAxis = applyDeadzone(yAxis, deadzone);
+            yaw = applyDeadzone(yaw, deadzone);
             setGamepadState({xAxis, yAxis, yaw});
         }
         
@@ -124,13 +134,17 @@ export default function Drone(props: IDroneProps) {
     return (<>
                 <mesh ref={droneRef}>
                     <CameraControl firstPersonView={props.firstPersonView} hideWalls={props.hideWalls} wallLayerNumber={props.wallLayerNumber} />
-                    {/* <OrthographicCamera position={[0, 0, 1]} zoom={camZoomLevel} makeDefault={!props.firstPersonView} />
-                    <PerspectiveCamera ref={cameraRef} makeDefault={props.firstPersonView} position={[0, 0, 1]} /> */}
-                    {/* <OrbitControls enabled={props.firstPersonView} /> */}
                     <sphereGeometry args={droneArgs}/>
                     <pointLight position={[0, 0, 1]} />
                     <meshBasicMaterial attach="material" color={droneCollilde? "red" : "blue"} />
                     {props.onlyFrontSensor? distanceSensors[4] : distanceSensors}
                 </mesh>
             </>);
+}
+
+function applyDeadzone(value: number, deadzone: number): number {
+    if (Math.abs(value) < deadzone) {
+        return 0;
+    }
+    return value;
 }
