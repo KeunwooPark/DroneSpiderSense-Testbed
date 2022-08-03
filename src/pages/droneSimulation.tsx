@@ -17,6 +17,7 @@ const DroneSimulation: NextPage = () => {
     const [hideSpheres, setHideSpheres] = useState(false);
     const [showAngleRange, setShowAngleRange] = useState(false);
     const [onlyFrontSensor, setOnlyFrontSensor] = useState(false);
+    const [firstPersonView, setFirstPersonView] = useState(false);
     const initialWallParams = {maxWidth: 6, thickness: 0.3, pathCenter: 0, pathWidth: 0, distance: 0, minPathWidth: 0.3, layerNumber: wallLayerNumber };
     const [hapticPacketQueue, setHapticPacketQueue] = useState<IHapticPacket[]>([]);
 
@@ -38,6 +39,10 @@ const DroneSimulation: NextPage = () => {
 
     function hideSpheresChanged() {
         setHideSpheres(!hideSpheres);
+    }
+
+    function firstPersionViewChanged() {
+        setFirstPersonView(!firstPersonView);
     }
 
     return (
@@ -67,6 +72,11 @@ const DroneSimulation: NextPage = () => {
                 <div>show only front sensor</div> 
                 <input type="checkbox" className="toggle" checked={onlyFrontSensor} onChange={onlyFrontSensorChanged} />
             </div>
+
+            <div className="ml-3">
+                <div>first person view</div> 
+                <input type="checkbox" className="toggle" checked={firstPersonView} onChange={firstPersionViewChanged} />
+            </div>
             
             <SerialCom pollInterval={2} hapticPacketQueue={hapticPacketQueue} baudRate={115200} />
             
@@ -75,8 +85,8 @@ const DroneSimulation: NextPage = () => {
                     <color args={["#000000"]} attach="background" />
                     <Physics>
                         <ambientLight />
-                        <OrthographicCamera position={[0, 0, 1]} zoom={camZoomLevel} makeDefault />
-                        <Drone wallLayerNumber={wallLayerNumber} hideRays={hideRays} showAngleRange={showAngleRange} onlyFrontSensor={onlyFrontSensor} hapticPacketQueue={hapticPacketQueue} hideSpheres={hideSpheres} />
+                        <OrthographicCamera position={[0, 0, 1]} zoom={camZoomLevel} makeDefault={!firstPersonView} />
+                        <Drone wallLayerNumber={wallLayerNumber} hideRays={hideRays} showAngleRange={showAngleRange} onlyFrontSensor={onlyFrontSensor} hapticPacketQueue={hapticPacketQueue} hideSpheres={hideSpheres} firstPersonView={firstPersonView} />
                         <GameMap initialWallParams={initialWallParams} hideWalls={hideWalls} wallLayerNumber={wallLayerNumber} />
                     </Physics>
                 </Canvas>

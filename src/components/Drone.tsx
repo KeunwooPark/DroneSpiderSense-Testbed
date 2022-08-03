@@ -1,8 +1,9 @@
 import { SphereArgs, useSphere } from "@react-three/cannon";
-import { Line, Sphere } from "@react-three/drei";
-import { useFrame } from "@react-three/fiber";
+import { Line, OrbitControls, OrthographicCamera, PerspectiveCamera, Sphere } from "@react-three/drei";
+import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useRef, useState } from "react";
-import { Mesh, Vector3 } from "three";
+import { Camera, MathUtils, Mesh, Vector3 } from "three";
+import * as THREE from "three";
 import { distanceToIntensity } from "../utils/hapticRenderer";
 import DistanceSensor from "./DistanceSensor";
 import IHapticPacket from "./IHapticPacket";
@@ -14,12 +15,15 @@ interface IDroneProps {
     onlyFrontSensor: boolean;
     hideSpheres: boolean;
     hapticPacketQueue: IHapticPacket[];
+    firstPersonView: boolean;
 }
 
 interface IGamepadState {
     xAxis: number;
     yAxis: number;
 }
+
+const camZoomLevel = 150;
 
 export default function Drone(props: IDroneProps) {
 
@@ -44,15 +48,32 @@ export default function Drone(props: IDroneProps) {
                                                         onCollideEnd: (e) => {setDroneCollilde(false)},
                                                     }));
 
+    const cameraRef = useRef<typeof PerspectiveCamera>(null);
+
+    useThree((state) => {
+        const camera = state.camera;
+
+        const isCameraOnDrone = camera instanceof THREE.PerspectiveCamera;
+        if (isCameraOnDrone) {
+            camera.rotateX(MathUtils.degToRad(90));
+            console.log(camera.rotation);
+        }
+    });
     
 
     useFrame((state) => {
 
         const diff = new Vector3(gamepadState.xAxis, -gamepadState.yAxis, 0).multiplyScalar(speed);
-        const newCamPos = state.camera.position.clone().add(diff);
-        state.camera.position.copy(newCamPos);
+        
+        if (droneRef.current == null) {
+            return;
+        }
 
-        const newDronePosition = new Vector3(newCamPos.x, newCamPos.y, 0);
+        const newPosition = new Vector3();
+        droneRef.current.getWorldPosition(newPosition);
+        newPosition.add(diff);
+
+        const newDronePosition = new Vector3(newPosition.x, newPosition.y, 0);
         droneApi.position.copy(newDronePosition);
     });
 
@@ -113,6 +134,9 @@ export default function Drone(props: IDroneProps) {
 
     return (<>
                 <mesh ref={droneRef}>
+                    <OrthographicCamera position={[0, 0, 1]} zoom={camZoomLevel} makeDefault={!props.firstPersonView} />
+                    <PerspectiveCamera ref={cameraRef} makeDefault={props.firstPersonView} position={[0, 0, 1]} />
+                    {/* <OrbitControls enabled={props.firstPersonView} /> */}
                     <sphereGeometry args={droneArgs}/>
                     <meshBasicMaterial attach="material" color={droneCollilde? "red" : "blue"} />
                     {props.onlyFrontSensor? distanceSensors[4] : distanceSensors}
