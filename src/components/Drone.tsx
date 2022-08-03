@@ -7,6 +7,7 @@ import * as THREE from "three";
 import { distanceToIntensity } from "../utils/hapticRenderer";
 import DistanceSensor from "./DistanceSensor";
 import IHapticPacket from "./IHapticPacket";
+import CameraControl from "./CameraControl";
 
 interface IDroneProps {
     wallLayerNumber: number;
@@ -16,6 +17,7 @@ interface IDroneProps {
     hideSpheres: boolean;
     hapticPacketQueue: IHapticPacket[];
     firstPersonView: boolean;
+    hideWalls: boolean;
 }
 
 interface IGamepadState {
@@ -47,18 +49,6 @@ export default function Drone(props: IDroneProps) {
                                                         onCollideBegin: (e) => {setDroneCollilde(true)},
                                                         onCollideEnd: (e) => {setDroneCollilde(false)},
                                                     }));
-
-    const cameraRef = useRef<typeof PerspectiveCamera>(null);
-
-    useThree((state) => {
-        const camera = state.camera;
-
-        const isCameraOnDrone = camera instanceof THREE.PerspectiveCamera;
-        if (isCameraOnDrone) {
-            camera.rotateX(MathUtils.degToRad(90));
-            console.log(camera.rotation);
-        }
-    });
     
 
     useFrame((state) => {
@@ -134,8 +124,9 @@ export default function Drone(props: IDroneProps) {
 
     return (<>
                 <mesh ref={droneRef}>
-                    <OrthographicCamera position={[0, 0, 1]} zoom={camZoomLevel} makeDefault={!props.firstPersonView} />
-                    <PerspectiveCamera ref={cameraRef} makeDefault={props.firstPersonView} position={[0, 0, 1]} />
+                    <CameraControl firstPersonView={props.firstPersonView} hideWalls={props.hideWalls} wallLayerNumber={props.wallLayerNumber} />
+                    {/* <OrthographicCamera position={[0, 0, 1]} zoom={camZoomLevel} makeDefault={!props.firstPersonView} />
+                    <PerspectiveCamera ref={cameraRef} makeDefault={props.firstPersonView} position={[0, 0, 1]} /> */}
                     {/* <OrbitControls enabled={props.firstPersonView} /> */}
                     <sphereGeometry args={droneArgs}/>
                     <meshBasicMaterial attach="material" color={droneCollilde? "red" : "blue"} />

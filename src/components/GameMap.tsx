@@ -36,13 +36,7 @@ export default function GameMap(props: IMapProps) {
         setWallComponents(_wallComponents);
     }, [props.initialWallParams]);
 
-    useEffect(() => {
-        if (!props.hideWalls) {
-            threeState.camera.layers.enable(props.wallLayerNumber);
-        } else {
-            threeState.camera.layers.disable(props.wallLayerNumber);
-        }
-    }, [props.hideWalls]);
+    
 
     return (<mesh>{wallComponents}</mesh>);
 }
