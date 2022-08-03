@@ -129,6 +129,7 @@ export default function Drone(props: IDroneProps) {
                     <PerspectiveCamera ref={cameraRef} makeDefault={props.firstPersonView} position={[0, 0, 1]} /> */}
                     {/* <OrbitControls enabled={props.firstPersonView} /> */}
                     <sphereGeometry args={droneArgs}/>
+                    <pointLight position={[0, 0, 1]} />
                     <meshBasicMaterial attach="material" color={droneCollilde? "red" : "blue"} />
                     {props.onlyFrontSensor? distanceSensors[4] : distanceSensors}
                 </mesh>

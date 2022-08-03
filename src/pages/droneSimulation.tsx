@@ -12,7 +12,7 @@ const wallLayerNumber = 1;
 const camZoomLevel = 150;
 
 const DroneSimulation: NextPage = () => {
-    const [hideWalls, setHideWalls] = useState(true);
+    const [hideWalls, setHideWalls] = useState(false);
     const [hideRays, setHideRays] = useState(false);
     const [hideSpheres, setHideSpheres] = useState(false);
     const [showAngleRange, setShowAngleRange] = useState(false);
@@ -84,7 +84,7 @@ const DroneSimulation: NextPage = () => {
                 <Canvas className="">
                     <color args={["#000000"]} attach="background" />
                     <Physics>
-                        <ambientLight />
+                        {/* <ambientLight color={"#FFFFFF"} /> */}
                         <Drone wallLayerNumber={wallLayerNumber} hideRays={hideRays} showAngleRange={showAngleRange} onlyFrontSensor={onlyFrontSensor} hapticPacketQueue={hapticPacketQueue} hideSpheres={hideSpheres} firstPersonView={firstPersonView} hideWalls={hideWalls} />
                         <GameMap initialWallParams={initialWallParams} hideWalls={hideWalls} wallLayerNumber={wallLayerNumber} />
                     </Physics>

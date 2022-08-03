@@ -32,9 +32,11 @@ export default function Wall(props: IWallProps) {
     return (<>
                 <mesh ref={rightWallRef} layers={props.layerNumber}>
                     <boxGeometry args={rightWallArgs}/>
+                    <meshStandardMaterial attach="material"  />
                 </mesh>
                 <mesh ref={leftWallRef} layers={props.layerNumber}>
                     <boxGeometry args={leftWallArgs}/>
+                    <meshStandardMaterial attach="material"  />
                 </mesh>
             </>);
 }
