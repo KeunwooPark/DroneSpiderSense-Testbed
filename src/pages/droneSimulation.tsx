@@ -6,12 +6,13 @@ import Drone from "../components/Drone";
 import GameMap from "../components/GameMap";
 import SerialCom from "../components/SerialCom";
 import IHapticPacket from "../components/IHapticPacket";
+import { OrthographicCamera } from "@react-three/drei";
 
 const wallLayerNumber = 1;
 const camZoomLevel = 150;
 
-const TwoDimDroneGame: NextPage = () => {
-    const [hideWalls, setHideWalls] = useState(false);
+const DroneSimulation: NextPage = () => {
+    const [hideWalls, setHideWalls] = useState(true);
     const [hideRays, setHideRays] = useState(false);
     const [hideSpheres, setHideSpheres] = useState(false);
     const [showAngleRange, setShowAngleRange] = useState(false);
@@ -41,7 +42,7 @@ const TwoDimDroneGame: NextPage = () => {
 
     return (
         <div className="container mx-auto h-screen">
-            <h1 className="text-5xl">TwoDimDroneGame</h1>
+            <h1 className="text-5xl">drone simulation</h1>
             <div className="ml-3">
                 <div>walls</div> 
                 <input type="checkbox" className="toggle" checked={!hideWalls} onChange={hideWallsChanged} />
@@ -70,10 +71,11 @@ const TwoDimDroneGame: NextPage = () => {
             <SerialCom pollInterval={2} hapticPacketQueue={hapticPacketQueue} baudRate={115200} />
             
             <div className="w-1/2 h-1/2">
-                <Canvas className="" camera={{position: [0, 0, 1], zoom: camZoomLevel}} orthographic>
+                <Canvas className="">
                     <color args={["#000000"]} attach="background" />
                     <Physics>
                         <ambientLight />
+                        <OrthographicCamera position={[0, 0, 1]} zoom={camZoomLevel} makeDefault />
                         <Drone wallLayerNumber={wallLayerNumber} hideRays={hideRays} showAngleRange={showAngleRange} onlyFrontSensor={onlyFrontSensor} hapticPacketQueue={hapticPacketQueue} hideSpheres={hideSpheres} />
                         <GameMap initialWallParams={initialWallParams} hideWalls={hideWalls} wallLayerNumber={wallLayerNumber} />
                     </Physics>
@@ -83,4 +85,4 @@ const TwoDimDroneGame: NextPage = () => {
     )
 }
 
-export default TwoDimDroneGame;
+export default DroneSimulation;

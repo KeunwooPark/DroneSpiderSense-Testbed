@@ -21,7 +21,7 @@ const Home: NextPage = () => {
               <Link href={"hardwareTest"}>hardware test</Link>
             </li>
             <li className="text-lg">
-              <Link href={"twoDimDroneGame"}>2D drone game</Link>
+              <Link href={"droneSimulation"}>drone simulation</Link>
             </li>
           </ul>
         </div>
