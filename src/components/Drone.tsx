@@ -26,7 +26,7 @@ interface IGamepadState {
     yaw: number;
 }
 
-const deadzone = 0.1;
+const deadzone = 0.15;
 
 export default function Drone(props: IDroneProps) {
 
