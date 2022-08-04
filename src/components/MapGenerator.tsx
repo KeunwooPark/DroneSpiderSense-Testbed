@@ -17,30 +17,59 @@ function generateMap(width: number, height: number): number[][] {
     // physical: related to actual cells in the map
     // logical: related to paths and walls in the map
 
-    const logicalMap = createLogicalMap(width, height);
-    
+    const edges = createLogicalMap(width, height);
+    console.log(edges);
     const edge = new Edge(new Node(0, 0), new Node(0, 1));
-    console.log(edge)
-    return generatePhysicalMapFromEdges([edge], width, height);
+    return generatePhysicalMapFromEdges(edges, width, height);
 }
 
-function createLogicalMap(width: number, height: number): Node[][] {
-    const logicalWidth = Math.floor((width - 2) / 2);
-    const logicalHeight = Math.floor((height - 2) / 2);
+function createLogicalMap(width: number, height: number): Edge[] {
+    const logicalWidth = converToLogicalLength(width);
+    const logicalHeight = converToLogicalLength(height);
 
     if (logicalWidth < 1 || logicalHeight < 1) {
         return [];
     }
 
-    const map: Node[][] = [];
+    const nodeMap: Node[][] = [];
     for (let i = 0; i < logicalWidth; i++) {
-        map[i] = [];
+        nodeMap[i] = [];
         for (let j = 0; j < logicalHeight; j++) {
-            map[i]![j] = new Node(i, j);
+            nodeMap[i]![j] = new Node(i, j);
         }
     }
 
-    return map;
+    // start from 0, 0
+    const startNode = nodeMap[0]![0]!;
+    startNode.markVisited();
+
+    const backtrackingStack: Node[] = [startNode];
+    const edges: Edge[] = [];
+    while (backtrackingStack.length > 0) {
+        const lastNode = backtrackingStack[backtrackingStack.length - 1]!;
+        const adjacentNode = lastNode.getRandomNotVisitiedAdjacentNode(nodeMap);
+        console.log(backtrackingStack.length);
+        if (adjacentNode == null) {
+            // time to backtrack
+            backtrackingStack.pop();
+            continue;
+        } else {
+            // add adjacent node to the stack
+            adjacentNode.markVisited();
+            backtrackingStack.push(adjacentNode);
+            edges.push(new Edge(lastNode, adjacentNode));
+        }
+    }
+
+    return edges;
+}
+
+function converToLogicalLength(physicalLength: number): number {
+    if (physicalLength % 2 === 0) {
+        return (physicalLength - 2) / 2;
+    } else {
+        return Math.ceil(physicalLength - 2 ) / 2;
+    }
 }
 
 class Node {
@@ -60,6 +89,45 @@ class Node {
 
     public getPhysicalCol(): number {
         return this.col * 2 + 1;
+    }
+
+    public getRandomNotVisitiedAdjacentNode(nodeMap: Node[][]): Node | null {
+        const adjacentNodes = this.getAdjacentNodes(nodeMap);
+        const unvisitedAdjacentNodes = adjacentNodes.filter(node => !node.visited);
+        if (unvisitedAdjacentNodes.length > 0) {
+            const randomIndex = Math.floor(Math.random() * unvisitedAdjacentNodes.length);
+            return unvisitedAdjacentNodes[randomIndex]!;
+        } else {
+            return null;
+        }
+    }
+
+    public markVisited() {
+        this.visited = true;
+    }
+
+    public getAdjacentNodes(nodeMap: Node[][]): Node[] {
+        const adjacentNodes: Node[] = [];
+        const row = this.row;
+        const col = this.col;
+
+        if (nodeMap.length === 0 || nodeMap[0]!.length === 0) {
+            throw new Error("nodeMap is empty");
+        }
+
+        if (row > 0) {
+            adjacentNodes.push(nodeMap[row - 1]![col]!);
+        }
+        if (row < nodeMap.length - 1) {
+            adjacentNodes.push(nodeMap[row + 1]![col]!);
+        }
+        if (col > 0) {
+            adjacentNodes.push(nodeMap[row]![col - 1]!);
+        }
+        if (col < nodeMap[0]!.length - 1) {
+            adjacentNodes.push(nodeMap[row]![col + 1]!);
+        }
+        return adjacentNodes;
     }
 }
 
@@ -137,27 +205,27 @@ function generatePhysicalMapFromEdges(edges: Edge[], width: number, height: numb
 }
 
 interface IMapGeneratorProps {
-    mapDefinition: IMapDefinition;
+    onMapGenerated: (mapDefinition: IMapDefinition) => void;
 }
 
 export default function MapGenerator(props: IMapGeneratorProps) {
-    const width = 20;
-    const height = 20;
+    const width = 11;
+    const height = 11;
+    const cellSize = 0.7;
     const [map, setMap] = useState<number[][]>([]);
 
-    useEffect(() => {
+    function clickGenerateMap() {
+        console.log("generating...");
         const _map = generateMap(width, height);
         setMap(_map);
-    }, []);
 
-    useEffect(() => {
-        props.mapDefinition.map = map;
-        props.mapDefinition.width = width;
-        props.mapDefinition.height = height;
-    }, [map, props.mapDefinition]);
+        const mapDefinition = {map: _map, width: width, height: height, cellSize: cellSize};
+        props.onMapGenerated(mapDefinition);
+    }
 
     return <>
         <h2 className="text-lg">map generator</h2>
-        <Map2DVisualizer height={height} width={width} map={map} cellSize={props.mapDefinition.cellSize} />
+        <button className="btn btn-primary" onClick={clickGenerateMap}>generate</button>
+        <Map2DVisualizer height={height} width={width} map={map} cellSize={cellSize} />
     </>
 }

@@ -45,6 +45,10 @@ const DroneSimulation: NextPage = () => {
         setFirstPersonView(!firstPersonView);
     }
 
+    function onMapGenerated(mapDefinition: IMapDefinition) {
+        setMapDefinition(mapDefinition);
+    }
+
     return (
         <div className="container mx-auto h-screen">
             <h1 className="text-5xl">drone simulation</h1>
@@ -92,7 +96,7 @@ const DroneSimulation: NextPage = () => {
                 </Canvas>
             </div>
             <div className="my-3">
-                <MapGenerator mapDefinition={mapDefinition} />
+                <MapGenerator onMapGenerated={onMapGenerated} />
             </div>
         </div>
     )

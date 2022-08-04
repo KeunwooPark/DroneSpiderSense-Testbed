@@ -31,6 +31,7 @@ export default function GameMap(props: IMapProps) {
         }
 
         setCellComponents(_cellComponents);
+        console.log("map def updated");
     }, [props.mapDefinition]);
 
     return (<mesh>{cellComponents}</mesh>);
