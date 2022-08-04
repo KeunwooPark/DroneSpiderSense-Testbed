@@ -45,13 +45,18 @@ function createLogicalMap(width: number, height: number): Edge[] {
 
     const backtrackingStack: Node[] = [startNode];
     const edges: Edge[] = [];
+    let hitFirstEnd = false;
     while (backtrackingStack.length > 0) {
         const lastNode = backtrackingStack[backtrackingStack.length - 1]!;
         const adjacentNode = lastNode.getRandomNotVisitiedAdjacentNode(nodeMap);
-        console.log(backtrackingStack.length);
         if (adjacentNode == null) {
             // time to backtrack
             backtrackingStack.pop();
+
+            if (!hitFirstEnd) {
+                hitFirstEnd = true;
+                lastNode.setToTarget();
+            }
             continue;
         } else {
             // add adjacent node to the stack
@@ -77,6 +82,7 @@ class Node {
     public row: number;
     public col: number;
     public visited = false;
+    public target = false;
     
     constructor(row: number, col: number) {
         this.row = row;
@@ -128,6 +134,14 @@ class Node {
             adjacentNodes.push(nodeMap[row]![col + 1]!);
         }
         return adjacentNodes;
+    }
+
+    public isTarget(): boolean {
+        return this.target;
+    }
+
+    public setToTarget() {
+        this.target = true;
     }
 }
 
@@ -182,6 +196,15 @@ class Edge {
 
         return positions;
     }
+
+    getTargetPosition(): Vector2 | null {
+        if (this.to.isTarget()) {
+            return new Vector2(this.to.getPhysicalRow(), this.to.getPhysicalCol());
+        } else if (this.from.isTarget()) {
+            return new Vector2(this.from.getPhysicalRow(), this.from.getPhysicalCol());
+        }
+        return null;
+    }
 }
 
 function generatePhysicalMapFromEdges(edges: Edge[], width: number, height: number): number[][] {
@@ -199,7 +222,15 @@ function generatePhysicalMapFromEdges(edges: Edge[], width: number, height: numb
         for (const position of positionsToRemove) {
             map[position.x]![position.y] = 0;
         }
+
+        const targetPosition = edge.getTargetPosition();
+        if (targetPosition != null) {
+            map[targetPosition.x]![targetPosition.y] = 2;
+        }
     }
+
+    // entrance
+    map[1]![0] = 0;
 
     return map;
 }
