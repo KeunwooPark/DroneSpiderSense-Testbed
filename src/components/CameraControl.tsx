@@ -20,8 +20,6 @@ export default function CameraControl(props: ICameraControlProps) {
 
         const camera = perspectiveCamRef.current as THREE.PerspectiveCamera;
         camera.rotateX(MathUtils.degToRad(90));
-        // camera.rotateZ(MathUtils.degToRad(180));
-        console.log("rotate");
     }, []);
 
     useThree((state) => {

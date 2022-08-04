@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import IMapDefinition from "./IMapDefinition";
 import Map2DVisualizer from "./Map2DVisualizer";
 
@@ -13,13 +13,28 @@ function generateMap(width: number, height: number): number[][] {
     return map;
 }
 
-export default function MapGenerator(props: any) {
+interface IMapGeneratorProps {
+    mapDefinition: IMapDefinition;
+}
+
+export default function MapGenerator(props: IMapGeneratorProps) {
     const width = 20;
     const height = 20;
-    const [map, setMap] = useState<number[][]>(generateMap(width, height));
+    const [map, setMap] = useState<number[][]>([]);
+
+    useEffect(() => {
+        const _map = generateMap(width, height);
+        setMap(_map);
+    }, []);
+
+    useEffect(() => {
+        props.mapDefinition.map = map;
+        props.mapDefinition.width = width;
+        props.mapDefinition.height = height;
+    }, [map, props.mapDefinition]);
 
     return <>
         <h2 className="text-lg">map generator</h2>
-        <Map2DVisualizer height={height} width={width} map={map} />
+        <Map2DVisualizer height={height} width={width} map={map} cellSize={props.mapDefinition.cellSize} />
     </>
 }

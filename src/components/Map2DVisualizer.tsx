@@ -2,11 +2,12 @@ import IMapDefinition from "./IMapDefinition";
 
 export default function Map2DVisualizer(props: IMapDefinition) {
     
-
-    
-
     function getMapAsGrid() {
         const grid: JSX.Element[] = [];
+        if (props.map.length == 0) {
+            return;
+        }
+        
         for (let i = 0; i < props.width; i++) {
             const col = <div key={`map-col-${i}`}>{getRows(i)}</div>;
             grid.push(col);

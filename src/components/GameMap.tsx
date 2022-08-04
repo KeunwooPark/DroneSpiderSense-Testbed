@@ -1,5 +1,8 @@
 import { useThree } from "@react-three/fiber";
 import { useEffect, useState } from "react";
+import { Vector2 } from "three";
+import Cell from "./Cell";
+import IMapDefinition from "./IMapDefinition";
 import IWallProps from "./IWallProps";
 import Wall from "./Wall";
 
@@ -12,33 +15,52 @@ interface IMapProps {
     initialWallParams: IWallProps;
     wallLayerNumber: number;
     hideWalls: boolean;
+    mapDefinition: IMapDefinition;
 }
 
 export default function GameMap(props: IMapProps) {
     
-    const [wallComponents, setWallComponents] = useState<JSX.Element[]>([]);
-    const threeState = useThree();
+    const [cellComponents, setCellComponents] = useState<JSX.Element[]>([]);
     
+    // useEffect(() => {
+    //     if (wallComponents.length > 0) {
+    //         return;
+    //     }
+    //     const _wallComponents: JSX.Element[] = [];
+    //     const mapWallParams = createRandomWallParamsForMap(props.initialWallParams, numWalls, wallOffset);
+    //     for (const wallParam of mapWallParams) {
+    //         _wallComponents.push(<Wall key={wallParam.distance} 
+    //             maxWidth={wallParam.maxWidth} 
+    //             thickness={wallParam.thickness} 
+    //             pathCenter={wallParam.pathCenter} 
+    //             pathWidth={wallParam.pathWidth} distance={wallParam.distance} minPathWidth={wallParam.minPathWidth} layerNumber={props.initialWallParams.layerNumber}/>);
+    //     }
+
+    //     setWallComponents(_wallComponents);
+    // }, [props.initialWallParams]);
+
     useEffect(() => {
-        if (wallComponents.length > 0) {
-            return;
+        const _cellComponents: JSX.Element[] = [];
+
+        const mapWidth = props.mapDefinition.width;
+        const mapHeight = props.mapDefinition.height;
+        const map = props.mapDefinition.map;
+        const cellSize = props.mapDefinition.cellSize;
+        const wallOffset = new Vector2(0, 1);
+        for (let i = 0; i < mapWidth; i++) {
+            for (let j = 0; j < mapHeight; j++) {
+                if (map[i]![j] === 1) {
+                    const position = (new Vector2(i * cellSize, j * cellSize)).add(wallOffset);
+                    const cellComp = <Cell cellSize={cellSize} cellThickness={1} layerNumber={props.wallLayerNumber} position={position} ></Cell>
+                    _cellComponents.push(cellComp);
+                }
+            }
         }
-        const _wallComponents: JSX.Element[] = [];
-        const mapWallParams = createRandomWallParamsForMap(props.initialWallParams, numWalls, wallOffset);
-        for (const wallParam of mapWallParams) {
-            _wallComponents.push(<Wall key={wallParam.distance} 
-                maxWidth={wallParam.maxWidth} 
-                thickness={wallParam.thickness} 
-                pathCenter={wallParam.pathCenter} 
-                pathWidth={wallParam.pathWidth} distance={wallParam.distance} minPathWidth={wallParam.minPathWidth} layerNumber={props.initialWallParams.layerNumber}/>);
-        }
 
-        setWallComponents(_wallComponents);
-    }, [props.initialWallParams]);
+        setCellComponents(_cellComponents);
+    }, [props.mapDefinition]);
 
-    
-
-    return (<mesh>{wallComponents}</mesh>);
+    return (<mesh>{cellComponents}</mesh>);
 }
 
 function createRandomWallParamsForMap(initialParams: IWallProps, numWalls: number, wallOffset: number): IWallProps[] {

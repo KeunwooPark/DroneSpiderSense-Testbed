@@ -8,6 +8,7 @@ import SerialCom from "../components/SerialCom";
 import IHapticPacket from "../components/IHapticPacket";
 import { OrthographicCamera } from "@react-three/drei";
 import MapGenerator from "../components/MapGenerator";
+import IMapDefinition from "../components/IMapDefinition";
 
 const wallLayerNumber = 1;
 const camZoomLevel = 150;
@@ -21,6 +22,7 @@ const DroneSimulation: NextPage = () => {
     const [firstPersonView, setFirstPersonView] = useState(false);
     const initialWallParams = {maxWidth: 6, thickness: 0.3, pathCenter: 0, pathWidth: 0, distance: 0, minPathWidth: 0.3, layerNumber: wallLayerNumber };
     const [hapticPacketQueue, setHapticPacketQueue] = useState<IHapticPacket[]>([]);
+    const [mapDefinition, setMapDefinition] = useState<IMapDefinition>({width: 0, height: 0, map: [], cellSize: 0.3});
 
     function hideWallsChanged() {
         setHideWalls(!hideWalls);
@@ -88,12 +90,12 @@ const DroneSimulation: NextPage = () => {
                     <Physics>
                         {/* <ambientLight color={"#FFFFFF"} /> */}
                         <Drone wallLayerNumber={wallLayerNumber} hideRays={hideRays} showAngleRange={showAngleRange} onlyFrontSensor={onlyFrontSensor} hapticPacketQueue={hapticPacketQueue} hideSpheres={hideSpheres} firstPersonView={firstPersonView} hideWalls={hideWalls} />
-                        <GameMap initialWallParams={initialWallParams} hideWalls={hideWalls} wallLayerNumber={wallLayerNumber} />
+                        <GameMap initialWallParams={initialWallParams} hideWalls={hideWalls} wallLayerNumber={wallLayerNumber} mapDefinition={mapDefinition} />
                     </Physics>
                 </Canvas>
             </div>
             <div className="my-3">
-                <MapGenerator />
+                <MapGenerator mapDefinition={mapDefinition} />
             </div>
         </div>
     )
