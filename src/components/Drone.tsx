@@ -8,6 +8,7 @@ import { distanceToIntensity } from "../utils/hapticRenderer";
 import DistanceSensor from "./DistanceSensor";
 import IHapticPacket from "./IHapticPacket";
 import CameraControl from "./CameraControl";
+import { config } from "../utils/config";
 
 interface IDroneProps {
     wallLayerNumber: number;
@@ -26,22 +27,14 @@ interface IGamepadState {
     yaw: number;
 }
 
-const deadzone = 0.15;
-
 export default function Drone(props: IDroneProps) {
 
-    const speed = 0.5;
-    const rotationSpeed = MathUtils.degToRad(10);
-    const probDist = 0.3;
-    const numProbes = 8;
-    const sensorPollInterval = 100;
-    const droneSize = 0.1;
     const [droneCollilde, setDroneCollilde] = useState(false);
 
     const [gamepadState, setGamepadState] = useState<IGamepadState>({xAxis: 0, yAxis: 0, yaw: 0});
     const [distanceSensors, setDistanceSensors] = useState<JSX.Element[]>([]);
 
-    const droneArgs: SphereArgs = [droneSize];
+    const droneArgs: SphereArgs = [config.drone.size as number];
 
     const [droneRef, droneApi] = useSphere<Mesh>(() => ({ mass: 1, 
                                                         position: [0, 0, 0],
@@ -63,18 +56,20 @@ export default function Drone(props: IDroneProps) {
         const droneWorldPos = new Vector3();
         droneRef.current?.getWorldPosition(droneWorldPos);
 
-        const translateVelocity = new Vector3(gamepadState.xAxis, -gamepadState.yAxis, 0).multiplyScalar(speed);
+        const speedGain = config.drone.speedGain as number;
+        const translateVelocity = new Vector3(gamepadState.xAxis, -gamepadState.yAxis, 0).multiplyScalar(speedGain);
         const translateVelocityInWorld = drone.localToWorld(translateVelocity.clone()).sub(droneWorldPos);
         droneApi.velocity.set(translateVelocityInWorld.x, translateVelocityInWorld.y, translateVelocityInWorld.z);
 
+        const angularSpeedGain = config.drone.angularSpeedGain as number;
 
-        const angularSpeed = - gamepadState.yaw * speed;
+        const angularSpeed = - gamepadState.yaw * angularSpeedGain;
         droneApi.angularVelocity.set(0, 0, angularSpeed);
     });
 
     function pollGamepad(timestamp: number) {
         const gamepads = navigator.getGamepads().filter(g => g != null);
-        
+        const deadzone = config.drone.thumbstickDeadzone as number;
         if (gamepads.length > 0) {
             const gamepad = gamepads[0];
             let xAxis = gamepad!.axes[0] as number;
@@ -98,10 +93,12 @@ export default function Drone(props: IDroneProps) {
     useEffect(function setSensors() {
         const distanceSensors: JSX.Element[] = [];
         const angleOffset = -Math.PI / 2;
+        const sensorDistance = config.drone.sensorDistance as number;
+        const numProbes = config.drone.numProbes as number;
         for (let i = 0; i < numProbes; i++) {
             const angle = i * (2 * Math.PI / numProbes) + angleOffset;
-            const x = Math.cos(angle) * probDist;
-            const y = Math.sin(angle) * probDist;
+            const x = Math.cos(angle) * sensorDistance;
+            const y = Math.sin(angle) * sensorDistance;
             const direction = new Vector3(x, y, 0);
             direction.normalize();
             
@@ -113,7 +110,7 @@ export default function Drone(props: IDroneProps) {
                                                 showRaycastLine={!props.hideRays} 
                                                 showAngleRange={props.showAngleRange}
                                                 angleRange={2 * Math.PI / numProbes}
-                                                pollInterval={sensorPollInterval}
+                                                pollInterval={config.drone.sensorPollingInterval as number} 
                                                 showSphere={!props.hideSpheres}
                                                 onDistanceChange={onSensorDistanceChange}/>);
         }

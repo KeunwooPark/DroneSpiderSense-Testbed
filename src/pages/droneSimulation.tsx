@@ -14,7 +14,7 @@ const wallLayerNumber = 1;
 const DroneSimulation: NextPage = () => {
     const [hideWalls, setHideWalls] = useState(false);
     const [hideRays, setHideRays] = useState(false);
-    const [hideSpheres, setHideSpheres] = useState(false);
+    const [hideSpheres, setHideSpheres] = useState(true);
     const [showAngleRange, setShowAngleRange] = useState(false);
     const [onlyFrontSensor, setOnlyFrontSensor] = useState(false);
     const [firstPersonView, setFirstPersonView] = useState(false);
