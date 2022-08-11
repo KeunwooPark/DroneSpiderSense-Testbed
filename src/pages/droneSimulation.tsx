@@ -8,6 +8,7 @@ import SerialCom from "../components/SerialCom";
 import IHapticPacket from "../components/IHapticPacket";
 import MapGenerator from "../components/MapGenerator";
 import IMapDefinition from "../components/IMapDefinition";
+import { config } from "../utils/config";
 
 const wallLayerNumber = 1;
 
@@ -19,7 +20,7 @@ const DroneSimulation: NextPage = () => {
     const [onlyFrontSensor, setOnlyFrontSensor] = useState(false);
     const [firstPersonView, setFirstPersonView] = useState(false);
     const [hapticPacketQueue, setHapticPacketQueue] = useState<IHapticPacket[]>([]);
-    const [mapDefinition, setMapDefinition] = useState<IMapDefinition>({width: 0, height: 0, map: [], cellSize: 0.7});
+    const [mapDefinition, setMapDefinition] = useState<IMapDefinition>({width: 0, height: 0, map: [], cellSize: config.game.map.cellSize as number});
 
     function hideWallsChanged() {
         setHideWalls(!hideWalls);

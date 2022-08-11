@@ -3,7 +3,6 @@ import { Box, Line, OrbitControls, OrthographicCamera, PerspectiveCamera, Sphere
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useRef, useState } from "react";
 import { Camera, Euler, MathUtils, Mesh, Quaternion, Vector3 } from "three";
-import * as THREE from "three";
 import { distanceToIntensity } from "../utils/hapticRenderer";
 import DistanceSensor from "./DistanceSensor";
 import IHapticPacket from "./IHapticPacket";
@@ -33,7 +32,7 @@ export default function Drone(props: IDroneProps) {
 
     const [gamepadState, setGamepadState] = useState<IGamepadState>({xAxis: 0, yAxis: 0, yaw: 0});
     const [distanceSensors, setDistanceSensors] = useState<JSX.Element[]>([]);
-
+    
     const droneArgs: SphereArgs = [config.drone.size as number];
 
     const [droneRef, droneApi] = useSphere<Mesh>(() => ({ mass: 1, 

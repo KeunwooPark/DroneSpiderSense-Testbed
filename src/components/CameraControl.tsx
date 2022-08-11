@@ -3,13 +3,12 @@ import { useThree } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { MathUtils } from "three";
+import { config } from "../utils/config";
 interface ICameraControlProps {
     firstPersonView: boolean;
     hideWalls: boolean;
     wallLayerNumber: number;
 }
-
-const camZoomLevel = 150;
 
 export default function CameraControl(props: ICameraControlProps) {
     const perspectiveCamRef = useRef(null);
@@ -31,7 +30,7 @@ export default function CameraControl(props: ICameraControlProps) {
     });
 
     return <>
-        <OrthographicCamera position={[0, 0, 1]} zoom={camZoomLevel} makeDefault={!props.firstPersonView} />
+        <OrthographicCamera position={[0, 0, 1]} zoom={config.game.camZoomLevel as number} makeDefault={!props.firstPersonView} />
         {/* <OrbitControls /> */}
         <PerspectiveCamera ref={perspectiveCamRef} makeDefault={props.firstPersonView} position={[0, 0, 0]} />
     </>

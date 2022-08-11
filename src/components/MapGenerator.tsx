@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Vector2 } from "three";
+import { config } from "../utils/config";
 import IMapDefinition from "./IMapDefinition";
 import Map2DVisualizer from "./Map2DVisualizer";
 
@@ -18,7 +19,6 @@ function generateMap(width: number, height: number): number[][] {
     // logical: related to paths and walls in the map
 
     const edges = createLogicalMap(width, height);
-    console.log(edges);
     const edge = new Edge(new Node(0, 0), new Node(0, 1));
     return generatePhysicalMapFromEdges(edges, width, height);
 }
@@ -240,9 +240,10 @@ interface IMapGeneratorProps {
 }
 
 export default function MapGenerator(props: IMapGeneratorProps) {
-    const width = 11;
-    const height = 11;
-    const cellSize = 0.7;
+    const width = config.game.map.width as number;
+    const height = config.game.map.height as number;
+    const cellSize = config.game.map.cellSize as number;
+    
     const [map, setMap] = useState<number[][]>([]);
 
     function clickGenerateMap() {

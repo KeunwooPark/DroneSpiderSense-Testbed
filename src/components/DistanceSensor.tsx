@@ -1,9 +1,9 @@
 import { Line, Sphere } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
-import { getMaxListeners } from "process";
 import { RefObject, useEffect, useState } from "react";
 import useInterval from "react-useinterval";
 import { Intersection, Mesh, Object3D, Raycaster, Scene, Vector, Vector3 } from "three";
+import { config } from "../utils/config";
 import { distanceToSize } from "../utils/hapticRenderer";
 
 interface IDistanceSensorProps {
@@ -18,9 +18,6 @@ interface IDistanceSensorProps {
     pollInterval: number;
     onDistanceChange: (id: number, distance: number) => void;
 }
-
-const distanceFromDrone = 0.3;
-const numSubRays = 5;
 
 export default function DistanceSensor(props: IDistanceSensorProps) {
 
@@ -38,8 +35,9 @@ export default function DistanceSensor(props: IDistanceSensorProps) {
         setRaycaster(raycaster);
 
         const subDirections: Vector3[] = [];
-
         const zAxis = new Vector3(0, 0, 1);
+        const numSubRays = config.drone.sensor.numSubRays as number;
+
         const midAngle = props.angleRange / 2;
         const angleStep = props.angleRange / (numSubRays - 1);
         const startingDirection = props.direction.clone().applyAxisAngle(zAxis, -midAngle);
@@ -113,7 +111,8 @@ export default function DistanceSensor(props: IDistanceSensorProps) {
 
         if(isHit) {
             const size = distanceToSize(raycastHitDistance);
-            return <Sphere args={[size]} position={props.direction.clone().multiplyScalar(distanceFromDrone)}> 
+            const sensorDistance = config.drone.sensorDistance;
+            return <Sphere args={[size]} position={props.direction.clone().multiplyScalar(sensorDistance)}> 
                 <meshBasicMaterial color={"red"} />
             </Sphere>
         } else {
