@@ -1,8 +1,8 @@
 import { SphereArgs, useSphere } from "@react-three/cannon";
-import { Line, OrbitControls, OrthographicCamera, PerspectiveCamera, Sphere } from "@react-three/drei";
+import { Box, Line, OrbitControls, OrthographicCamera, PerspectiveCamera, Sphere, Text } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useRef, useState } from "react";
-import { Camera, MathUtils, Mesh, Vector3 } from "three";
+import { Camera, Euler, MathUtils, Mesh, Quaternion, Vector3 } from "three";
 import * as THREE from "three";
 import { distanceToIntensity } from "../utils/hapticRenderer";
 import DistanceSensor from "./DistanceSensor";
@@ -137,6 +137,7 @@ export default function Drone(props: IDroneProps) {
                     <sphereGeometry args={droneArgs}/>
                     <pointLight position={[0, 0, 1]} />
                     <meshBasicMaterial attach="material" color={droneCollilde? "red" : "blue"} />
+                    <CollisionNoti position={[0, 0.1, 0]} visible={droneCollilde} />
                     {props.onlyFrontSensor? distanceSensors[4] : distanceSensors}
                 </mesh>
             </>);
@@ -147,4 +148,8 @@ function applyDeadzone(value: number, deadzone: number): number {
         return 0;
     }
     return value;
+}
+
+function CollisionNoti(props: any) {
+    return <Text fontSize={0.01} rotation={new Euler(Math.PI / 2, 0, 0)} position={props.position} color={"red"} anchorX="center" anchorY="middle" visible={props.visible}>collision</Text>
 }

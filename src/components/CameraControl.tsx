@@ -32,7 +32,7 @@ export default function CameraControl(props: ICameraControlProps) {
 
     return <>
         <OrthographicCamera position={[0, 0, 1]} zoom={camZoomLevel} makeDefault={!props.firstPersonView} />
-        {/* <OrbitControls /> */}
+        
         <PerspectiveCamera ref={perspectiveCamRef} makeDefault={props.firstPersonView} position={[0, 0, 0]} />
     </>
 }
