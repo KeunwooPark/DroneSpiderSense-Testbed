@@ -1,6 +1,6 @@
 export const maxDistance = 0.5;
 export const minIntensity = 0;
-export const maxIntensity = 50;
+export const maxIntensity = 100;
 
 export function distanceToIntensity(distance: number) {
     const reverseDistance = maxDistance - distance;
