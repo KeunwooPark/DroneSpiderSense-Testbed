@@ -1,6 +1,6 @@
 export const maxDistance = 0.5;
 export const minIntensity = 0;
-export const maxIntensity = 100;
+export const maxIntensity = 50;
 
 export function distanceToIntensity(distance: number) {
     const reverseDistance = maxDistance - distance;
@@ -18,6 +18,10 @@ export function distanceToIntensity(distance: number) {
         return maxIntensity;
     }
     return intIntensity;
+}
+
+export function sensorIdToActuatorID(sensorID: number) {
+    return (( 8- sensorID) + 1) % 8;
 }
 
 const minSize = 0;

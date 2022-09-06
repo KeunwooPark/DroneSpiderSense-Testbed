@@ -3,7 +3,7 @@ import { Box, Line, OrbitControls, OrthographicCamera, PerspectiveCamera, Sphere
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useRef, useState } from "react";
 import { Camera, Euler, MathUtils, Mesh, Quaternion, Vector3 } from "three";
-import { distanceToIntensity } from "../utils/hapticRenderer";
+import { distanceToIntensity, sensorIdToActuatorID } from "../utils/hapticRenderer";
 import DistanceSensor from "./DistanceSensor";
 import IHapticPacket from "./IHapticPacket";
 import CameraControl from "./CameraControl";
@@ -91,11 +91,10 @@ export default function Drone(props: IDroneProps) {
 
     useEffect(function setSensors() {
         const distanceSensors: JSX.Element[] = [];
-        const angleOffset = -Math.PI / 2;
         const sensorDistance = config.drone.sensorDistance as number;
         const numProbes = config.drone.numProbes as number;
         for (let i = 0; i < numProbes; i++) {
-            const angle = i * (2 * Math.PI / numProbes) + angleOffset;
+            const angle = i * (2 * Math.PI / numProbes);
             const x = Math.cos(angle) * sensorDistance;
             const y = Math.sin(angle) * sensorDistance;
             const direction = new Vector3(x, y, 0);
@@ -124,7 +123,8 @@ export default function Drone(props: IDroneProps) {
         }
 
         const intensity = distanceToIntensity(distance);
-        props.hapticPacketQueue.push({actuatorID: id, intensity});
+        const actuatorID = sensorIdToActuatorID(id);
+        props.hapticPacketQueue.push({actuatorID, intensity});
     }
 
     return (<>
@@ -134,7 +134,7 @@ export default function Drone(props: IDroneProps) {
                     <pointLight position={[0, 0, 1]} />
                     <meshBasicMaterial attach="material" color={droneCollilde? "red" : "blue"} />
                     <CollisionNoti position={[0, 0.1, 0]} visible={droneCollilde} />
-                    {props.onlyFrontSensor? distanceSensors[4] : distanceSensors}
+                    {props.onlyFrontSensor? distanceSensors[2] : distanceSensors}
                 </mesh>
             </>);
 }
