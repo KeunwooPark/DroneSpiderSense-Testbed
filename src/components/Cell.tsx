@@ -1,5 +1,6 @@
 import { useBox } from "@react-three/cannon";
-import { Mesh, Vector2 } from "three";
+import { useLoader } from "@react-three/fiber";
+import { Mesh, TextureLoader, Vector2 } from "three";
 
 interface ICellProps {
     cellSize: number;
@@ -11,9 +12,11 @@ interface ICellProps {
 export default function Cell(props: ICellProps) {
     const { cellSize, cellThickness, layerNumber, position } = props;
     const [cellRef] = useBox<Mesh>(() => ({ mass: 1, position: [position.x, position.y, 0], type: "Static", args: [cellSize, cellSize, cellThickness] }));
+
+    const colorMap = useLoader(TextureLoader, "/textures/wall.jpg");
     
     return (<mesh ref={cellRef} layers={layerNumber}>
         <boxGeometry args={[cellSize, cellSize, cellThickness]} />
-        <meshStandardMaterial attach="material" />
+        <meshStandardMaterial attach="material" map={colorMap} />
     </mesh>);
 }
