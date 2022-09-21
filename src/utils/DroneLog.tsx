@@ -9,8 +9,9 @@ export default class DroneLog {
     private rotZ: number;
     private time: number;
     private isCollide: boolean;
+    private foundTarget: boolean;
 
-    constructor(pos: Vector3, heading: Quaternion, isCollide: boolean) {
+    constructor(pos: Vector3, heading: Quaternion, isCollide: boolean, foundTarget: boolean) {
         this.posX = pos.x;
         this.posY = pos.y;
         this.posZ = pos.z;
@@ -23,6 +24,7 @@ export default class DroneLog {
         this.rotZ = headingVec.z;
 
         this.isCollide = isCollide;
+        this.foundTarget = foundTarget;
 
         this.time = Date.now();
     }
@@ -36,6 +38,7 @@ export default class DroneLog {
             rotY: this.rotY,
             rotZ: this.rotZ,
             isCollide: this.isCollide,
+            foundTarget: this.foundTarget,
             time: this.time
         });
     }

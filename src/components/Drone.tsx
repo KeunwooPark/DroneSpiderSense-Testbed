@@ -2,7 +2,7 @@ import { SphereArgs, useSphere } from "@react-three/cannon";
 import { Box, Line, OrbitControls, OrthographicCamera, PerspectiveCamera, Sphere, Text } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useRef, useState } from "react";
-import { Camera, Euler, MathUtils, Mesh, Quaternion, Vector3 } from "three";
+import { Camera, Euler, Layers, MathUtils, Mesh, Quaternion, Vector3 } from "three";
 import { distanceToIntensity, sensorIdToActuatorID } from "../utils/hapticRenderer";
 import DistanceSensor from "./DistanceSensor";
 import IHapticPacket from "./IHapticPacket";
@@ -28,6 +28,9 @@ interface IGamepadState {
     yaw: number;
 }
 
+const cellLayers = new Layers();
+cellLayers.set(config.game.map.cellLayer);
+
 export default function Drone(props: IDroneProps) {
 
     const [cellCollide, setCellCollide] = useState(false);
@@ -45,8 +48,20 @@ export default function Drone(props: IDroneProps) {
                                                         type: "Kinematic",
                                                         args: droneArgs,
                                                         collisionResponse: true,
-                                                        onCollideBegin: (e) => {console.log(e); setCellCollide(true);},
-                                                        onCollideEnd: (e) => {setCellCollide(false)},
+                                                        onCollideBegin: (e) => {
+                                                            if (e.body.layers.test(cellLayers)) {
+                                                                setCellCollide(true);
+                                                            } else {
+                                                                setTargetColllide(true);
+                                                            }
+                                                        },
+                                                        onCollideEnd: (e) => {
+                                                            if (e.body.layers.test(cellLayers)) {
+                                                                setCellCollide(false);
+                                                            } else {
+                                                                setTargetColllide(false);
+                                                            }
+                                                        },
                                                     }));
     
 
@@ -74,7 +89,7 @@ export default function Drone(props: IDroneProps) {
         drone.getWorldQuaternion(droneOrientation);
 
         if (isLogging) {
-            logs.push(new DroneLog(droneWorldPos, droneOrientation, cellCollide));
+            logs.push(new DroneLog(droneWorldPos, droneOrientation, cellCollide, targetCollide));
         }
     });
 
@@ -164,7 +179,7 @@ export default function Drone(props: IDroneProps) {
                     <sphereGeometry args={droneArgs}/>
                     <pointLight position={[0, 0, 1]} />
                     <meshBasicMaterial attach="material" color={cellCollide? "red" : "blue"} />
-                    <HeadupNoti position={[0, 0.1, 0]} visible={cellCollide} message={"collision"} />
+                    <HeadupNoti position={[0, 0.1, 0]} visible={cellCollide || targetCollide} message={targetCollide? "found target":"collision"} />
                     {props.onlyFrontSensor? distanceSensors[2] : distanceSensors}
                 </mesh>
             </>);

@@ -1,10 +1,12 @@
 import { SphereArgs, useSphere } from "@react-three/cannon";
 import { Sphere } from "@react-three/drei";
 import { Mesh, Vector2 } from "three";
+import { config } from "../utils/config";
 interface ITargetProps {
     position: Vector2;
     size: number;
 }
+
 export default function Target(props: ITargetProps) {
     const args: SphereArgs = [props.size];
     const [targetRef, targetApi] = useSphere<Mesh>(() => ({ mass: 1, 
@@ -12,9 +14,6 @@ export default function Target(props: ITargetProps) {
         type: "Kinematic",
         args: args,
         collisionResponse: true,
-        name: "target",
-        // onCollideBegin: (e) => {setDroneCollilde(true)},
-        // onCollideEnd: (e) => {setDroneCollilde(false)},
     }));
     return <mesh ref={targetRef}>
         <sphereGeometry args={[props.size]} />
