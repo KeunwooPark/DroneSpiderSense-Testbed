@@ -89,7 +89,7 @@ export default function Drone(props: IDroneProps) {
         drone.getWorldQuaternion(droneOrientation);
 
         if (isLogging) {
-            logs.push(new DroneLog(droneWorldPos, droneOrientation, cellCollide, targetCollide));
+            logs.push(new DroneLog(droneWorldPos, droneOrientation, translateVelocityInWorld, angularSpeed, cellCollide, targetCollide));
         }
     });
 
