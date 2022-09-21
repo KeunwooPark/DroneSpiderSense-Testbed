@@ -1,4 +1,4 @@
-export const maxDistance = 0.5;
+export const maxDistance = 0.35;
 export const minIntensity = 0;
 export const maxIntensity = 50;
 

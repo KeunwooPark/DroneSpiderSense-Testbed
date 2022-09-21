@@ -21,6 +21,7 @@ const DroneSimulation: NextPage = () => {
     const [firstPersonView, setFirstPersonView] = useState(false);
     const [hapticPacketQueue, setHapticPacketQueue] = useState<IHapticPacket[]>([]);
     const [mapDefinition, setMapDefinition] = useState<IMapDefinition>({width: 0, height: 0, map: [], cellSize: config.game.map.cellSize as number});
+    const [isLogging, setIsLogging] = useState(false);
 
     function hideWallsChanged() {
         setHideWalls(!hideWalls);
@@ -84,6 +85,7 @@ const DroneSimulation: NextPage = () => {
             </div>
             
             <SerialCom pollInterval={2} hapticPacketQueue={hapticPacketQueue} baudRate={115200} />
+            <button className="btn btn-primary mb-3" onClick={() => {setIsLogging(!isLogging)}}>{isLogging? "stop logging":"start logging"}</button>
             
             <div className="w-1/2 h-1/2">
                 <Canvas className="">
@@ -91,7 +93,7 @@ const DroneSimulation: NextPage = () => {
                     <color args={["#000000"]} attach="background" />
                     <Physics>
                         {/* <ambientLight color={"#FFFFFF"} /> */}
-                        <Drone wallLayerNumber={wallLayerNumber} hideRays={hideRays} showAngleRange={showAngleRange} onlyFrontSensor={onlyFrontSensor} hapticPacketQueue={hapticPacketQueue} hideSpheres={hideSpheres} firstPersonView={firstPersonView} hideWalls={hideWalls} />
+                        <Drone wallLayerNumber={wallLayerNumber} hideRays={hideRays} showAngleRange={showAngleRange} onlyFrontSensor={onlyFrontSensor} hapticPacketQueue={hapticPacketQueue} hideSpheres={hideSpheres} firstPersonView={firstPersonView} hideWalls={hideWalls} logging={isLogging} />
                         <GameMap wallLayerNumber={wallLayerNumber} mapDefinition={mapDefinition} />
                     </Physics>
                 </Canvas>

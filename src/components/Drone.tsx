@@ -8,6 +8,8 @@ import DistanceSensor from "./DistanceSensor";
 import IHapticPacket from "./IHapticPacket";
 import CameraControl from "./CameraControl";
 import { config } from "../utils/config";
+import DroneLog from "../utils/DroneLog";
+import saveAs from "file-saver";
 
 interface IDroneProps {
     wallLayerNumber: number;
@@ -18,6 +20,7 @@ interface IDroneProps {
     hapticPacketQueue: IHapticPacket[];
     firstPersonView: boolean;
     hideWalls: boolean;
+    logging: boolean;
 }
 
 interface IGamepadState {
@@ -32,6 +35,8 @@ export default function Drone(props: IDroneProps) {
 
     const [gamepadState, setGamepadState] = useState<IGamepadState>({xAxis: 0, yAxis: 0, yaw: 0});
     const [distanceSensors, setDistanceSensors] = useState<JSX.Element[]>([]);
+    const [logs, setLogs] = useState<DroneLog[]>([]);
+    const [isLogging, setIsLogging] = useState(false);
     
     const droneArgs: SphereArgs = [config.drone.size as number];
 
@@ -53,7 +58,7 @@ export default function Drone(props: IDroneProps) {
 
         const drone = droneRef.current as Mesh;
         const droneWorldPos = new Vector3();
-        droneRef.current?.getWorldPosition(droneWorldPos);
+        drone.getWorldPosition(droneWorldPos);
 
         const speedGain = config.drone.speedGain as number;
         const translateVelocity = new Vector3(gamepadState.xAxis, -gamepadState.yAxis, 0).multiplyScalar(speedGain);
@@ -64,6 +69,13 @@ export default function Drone(props: IDroneProps) {
 
         const angularSpeed = - gamepadState.yaw * angularSpeedGain;
         droneApi.angularVelocity.set(0, 0, angularSpeed);
+
+        const droneOrientation = new Quaternion();
+        drone.getWorldQuaternion(droneOrientation);
+
+        if (isLogging) {
+            logs.push(new DroneLog(droneWorldPos, droneOrientation, droneCollilde));
+        }
     });
 
     function pollGamepad(timestamp: number) {
@@ -115,6 +127,26 @@ export default function Drone(props: IDroneProps) {
         
         setDistanceSensors(distanceSensors);
     }, [props.wallLayerNumber, props.hideRays, props.showAngleRange, props.hideSpheres]);
+
+    useEffect(function logDroneState() {
+        if (props.logging) {
+            // start logging
+            setIsLogging(true);
+        } else {
+            // stop logging
+            setIsLogging(false);
+            setLogs([]);
+            if (logs.length > 0) { 
+                saveLogs();
+            }
+        }
+    }, [props.logging]);
+
+    function saveLogs() {
+        const logsInString = logs.map(l => l.toJSONString()).join("\n");
+        const blob = new Blob([logsInString], {type: "text/plain;charset=utf-8"});
+        saveAs(blob, "drone_logs.txt");
+    }
 
     function onSensorDistanceChange(id: number, distance: number) {
 

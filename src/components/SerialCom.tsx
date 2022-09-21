@@ -84,14 +84,14 @@ export default function SerialCom(props: ISerialComProps) {
     }
 
     return (<div className="">
-        <button className="btn btn-primary m-3" onClick={connect}>connect</button>
-        <button className="btn btn-primary" onClick={disconnect}>disconnect</button>
-        <div className="form-control max-width">
-            <label className="label cursor-pointer">
-                <span className="label-text">debug</span>
-                <input type="checkbox" className="toggle toggle-primary" checked={debug} onChange={toggleDebug} />
-            </label>
-        </div>
-        <Alert {...errorState} />
-    </div>);
-}
+                <button className="btn btn-primary m-3" onClick={connect}>connect</button>
+                <button className="btn btn-primary" onClick={disconnect}>disconnect</button>
+                <div className="form-control max-width">
+                    <label className="label cursor-pointer">
+                        <span className="label-text">debug</span>
+                        <input type="checkbox" className="toggle toggle-primary" checked={debug} onChange={toggleDebug} />
+                    </label>
+                </div>
+                <Alert {...errorState} />
+            </div>);
+    }
