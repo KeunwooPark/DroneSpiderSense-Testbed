@@ -1,14 +1,16 @@
 import { Sphere } from "@react-three/drei";
 import { useEffect, useState } from "react";
 import { Vector2 } from "three";
+import { config } from "../utils/config";
 import Cell from "./Cell";
 import IMapDefinition from "./IMapDefinition";
 import Target from "./Target";
 
 interface IMapProps {
-    wallLayerNumber: number;
     mapDefinition: IMapDefinition;
 }
+
+const cellLayer = config.game.map.cellLayer;
 
 export default function GameMap(props: IMapProps) {
     
@@ -27,7 +29,7 @@ export default function GameMap(props: IMapProps) {
                 const value = map[i]![j]!;
                 const position = (new Vector2(i * cellSize, j * cellSize)).add(wallOffset);
                 if (value === 1) {
-                    const cellComp = <Cell key={`cell-${i}-${j}`} cellSize={cellSize} cellThickness={1} layerNumber={props.wallLayerNumber} position={position}></Cell>
+                    const cellComp = <Cell key={`cell-${i}-${j}`} cellSize={cellSize} cellThickness={1} layerNumber={cellLayer} position={position}></Cell>
                     _cellComponents.push(cellComp);
                 } else if (value === 2) {
                     const targetComp = <Target key={`target-${i}-${j}`} position={position} size={cellSize * 0.25}></Target>

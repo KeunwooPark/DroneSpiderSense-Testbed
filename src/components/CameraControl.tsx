@@ -7,8 +7,9 @@ import { config } from "../utils/config";
 interface ICameraControlProps {
     firstPersonView: boolean;
     hideWalls: boolean;
-    wallLayerNumber: number;
 }
+
+const cellLayer = config.game.map.cellLayer;
 
 export default function CameraControl(props: ICameraControlProps) {
     const perspectiveCamRef = useRef(null);
@@ -23,9 +24,9 @@ export default function CameraControl(props: ICameraControlProps) {
 
     useThree((state) => {
         if (!props.hideWalls) {
-            state.camera.layers.enable(props.wallLayerNumber);
+            state.camera.layers.enable(cellLayer);
         } else {
-            state.camera.layers.disable(props.wallLayerNumber);
+            state.camera.layers.disable(cellLayer);
         }
     });
 

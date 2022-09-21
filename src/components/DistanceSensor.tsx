@@ -9,7 +9,6 @@ import { distanceToSize } from "../utils/hapticRenderer";
 interface IDistanceSensorProps {
     droneRef: RefObject<Mesh>;
     direction: Vector3;
-    wallLayerNumber: number;
     angleRange: number;
     showRaycastLine: boolean;
     showAngleRange: boolean;
@@ -18,6 +17,8 @@ interface IDistanceSensorProps {
     pollInterval: number;
     onDistanceChange: (id: number, distance: number) => void;
 }
+
+const cellLayer = config.game.map.cellLayer;
 
 export default function DistanceSensor(props: IDistanceSensorProps) {
 
@@ -31,7 +32,7 @@ export default function DistanceSensor(props: IDistanceSensorProps) {
 
     useEffect(() => {
         const raycaster = new Raycaster();
-        raycaster.layers.set(props.wallLayerNumber);
+        raycaster.layers.set(cellLayer);
         setRaycaster(raycaster);
 
         const subDirections: Vector3[] = [];

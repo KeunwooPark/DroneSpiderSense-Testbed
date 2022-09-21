@@ -10,8 +10,6 @@ import MapGenerator from "../components/MapGenerator";
 import IMapDefinition from "../components/IMapDefinition";
 import { config } from "../utils/config";
 
-const wallLayerNumber = 1;
-
 const DroneSimulation: NextPage = () => {
     const [hideWalls, setHideWalls] = useState(false);
     const [hideRays, setHideRays] = useState(false);
@@ -93,8 +91,8 @@ const DroneSimulation: NextPage = () => {
                     <color args={["#000000"]} attach="background" />
                     <Physics>
                         {/* <ambientLight color={"#FFFFFF"} /> */}
-                        <Drone wallLayerNumber={wallLayerNumber} hideRays={hideRays} showAngleRange={showAngleRange} onlyFrontSensor={onlyFrontSensor} hapticPacketQueue={hapticPacketQueue} hideSpheres={hideSpheres} firstPersonView={firstPersonView} hideWalls={hideWalls} logging={isLogging} />
-                        <GameMap wallLayerNumber={wallLayerNumber} mapDefinition={mapDefinition} />
+                        <Drone hideRays={hideRays} showAngleRange={showAngleRange} onlyFrontSensor={onlyFrontSensor} hapticPacketQueue={hapticPacketQueue} hideSpheres={hideSpheres} firstPersonView={firstPersonView} hideWalls={hideWalls} logging={isLogging} />
+                        <GameMap mapDefinition={mapDefinition} />
                     </Physics>
                 </Canvas>
             </div>

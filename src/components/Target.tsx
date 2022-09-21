@@ -12,6 +12,7 @@ export default function Target(props: ITargetProps) {
         type: "Kinematic",
         args: args,
         collisionResponse: true,
+        name: "target",
         // onCollideBegin: (e) => {setDroneCollilde(true)},
         // onCollideEnd: (e) => {setDroneCollilde(false)},
     }));

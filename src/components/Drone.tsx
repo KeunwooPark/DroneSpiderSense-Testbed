@@ -12,7 +12,6 @@ import DroneLog from "../utils/DroneLog";
 import saveAs from "file-saver";
 
 interface IDroneProps {
-    wallLayerNumber: number;
     hideRays: boolean;
     showAngleRange: boolean;
     onlyFrontSensor: boolean;
@@ -31,7 +30,8 @@ interface IGamepadState {
 
 export default function Drone(props: IDroneProps) {
 
-    const [droneCollilde, setDroneCollilde] = useState(false);
+    const [cellCollide, setCellCollide] = useState(false);
+    const [targetCollide, setTargetColllide] = useState(false);
 
     const [gamepadState, setGamepadState] = useState<IGamepadState>({xAxis: 0, yAxis: 0, yaw: 0});
     const [distanceSensors, setDistanceSensors] = useState<JSX.Element[]>([]);
@@ -45,8 +45,8 @@ export default function Drone(props: IDroneProps) {
                                                         type: "Kinematic",
                                                         args: droneArgs,
                                                         collisionResponse: true,
-                                                        onCollideBegin: (e) => {setDroneCollilde(true)},
-                                                        onCollideEnd: (e) => {setDroneCollilde(false)},
+                                                        onCollideBegin: (e) => {console.log(e); setCellCollide(true);},
+                                                        onCollideEnd: (e) => {setCellCollide(false)},
                                                     }));
     
 
@@ -74,7 +74,7 @@ export default function Drone(props: IDroneProps) {
         drone.getWorldQuaternion(droneOrientation);
 
         if (isLogging) {
-            logs.push(new DroneLog(droneWorldPos, droneOrientation, droneCollilde));
+            logs.push(new DroneLog(droneWorldPos, droneOrientation, cellCollide));
         }
     });
 
@@ -115,7 +115,6 @@ export default function Drone(props: IDroneProps) {
             distanceSensors.push(<DistanceSensor key={`sensor-${i}`} 
                                                 id={i}
                                                 droneRef={droneRef} 
-                                                wallLayerNumber={props.wallLayerNumber} 
                                                 direction={direction} 
                                                 showRaycastLine={!props.hideRays} 
                                                 showAngleRange={props.showAngleRange}
@@ -126,7 +125,7 @@ export default function Drone(props: IDroneProps) {
         }
         
         setDistanceSensors(distanceSensors);
-    }, [props.wallLayerNumber, props.hideRays, props.showAngleRange, props.hideSpheres]);
+    }, [props.hideRays, props.showAngleRange, props.hideSpheres]);
 
     useEffect(function logDroneState() {
         if (props.logging) {
@@ -161,11 +160,11 @@ export default function Drone(props: IDroneProps) {
 
     return (<>
                 <mesh ref={droneRef}>
-                    <CameraControl firstPersonView={props.firstPersonView} hideWalls={props.hideWalls} wallLayerNumber={props.wallLayerNumber} />
+                    <CameraControl firstPersonView={props.firstPersonView} hideWalls={props.hideWalls}/>
                     <sphereGeometry args={droneArgs}/>
                     <pointLight position={[0, 0, 1]} />
-                    <meshBasicMaterial attach="material" color={droneCollilde? "red" : "blue"} />
-                    <CollisionNoti position={[0, 0.1, 0]} visible={droneCollilde} />
+                    <meshBasicMaterial attach="material" color={cellCollide? "red" : "blue"} />
+                    <HeadupNoti position={[0, 0.1, 0]} visible={cellCollide} message={"collision"} />
                     {props.onlyFrontSensor? distanceSensors[2] : distanceSensors}
                 </mesh>
             </>);
@@ -178,6 +177,6 @@ function applyDeadzone(value: number, deadzone: number): number {
     return value;
 }
 
-function CollisionNoti(props: any) {
-    return <Text fontSize={0.01} rotation={new Euler(Math.PI / 2, 0, 0)} position={props.position} color={"red"} anchorX="center" anchorY="middle" visible={props.visible}>collision</Text>
+function HeadupNoti(props: any) {
+    return <Text fontSize={0.01} rotation={new Euler(Math.PI / 2, 0, 0)} position={props.position} color={"red"} anchorX="center" anchorY="middle" visible={props.visible}>{props.message}</Text>
 }
