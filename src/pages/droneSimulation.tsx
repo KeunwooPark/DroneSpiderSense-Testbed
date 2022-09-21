@@ -84,7 +84,7 @@ const DroneSimulation: NextPage = () => {
                 <input type="checkbox" className="toggle" checked={firstPersonView} onChange={firstPersionViewChanged} />
             </div>
             
-            <SerialCom pollInterval={2} hapticPacketQueue={hapticPacketQueue} baudRate={115200} />
+            <SerialCom pollInterval={config.serial.pollInterval} hapticPacketQueue={hapticPacketQueue} baudRate={115200} />
             <button className="btn btn-primary mb-3" onClick={() => {setIsLogging(!isLogging)}}>{isLogging? "stop logging":"start logging"}</button>
             
             <div className="w-1/2 h-1/2">

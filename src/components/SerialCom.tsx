@@ -45,8 +45,6 @@ export default function SerialCom(props: ISerialComProps) {
             const writer = serialPort.writable.getWriter();
             await writer.write(data);
             writer.releaseLock();
-            console.log("Sent: " + packet.actuatorID + " " + packet.intensity);
-
         }
 
         
@@ -67,7 +65,6 @@ export default function SerialCom(props: ISerialComProps) {
 
     function disconnect() {
         if (serialPort?.readable?.locked || serialPort?.writable?.locked) {
-            // busy wait
             setErrorState({show: true, message: "Serial port is busy."});
             return;
         }
