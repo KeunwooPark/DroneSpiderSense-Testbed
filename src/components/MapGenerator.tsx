@@ -4,7 +4,7 @@ import { config } from "../utils/config";
 import IMapDefinition from "./IMapDefinition";
 import Map2DVisualizer from "./Map2DVisualizer";
 
-function generateMap(width: number, height: number): number[][] {
+function generateMap(width: number, height: number, singlePath: boolean): number[][] {
     // backtracking algorithm to generate a map
 
     // The Algorithm
@@ -18,12 +18,12 @@ function generateMap(width: number, height: number): number[][] {
     // physical: related to actual cells in the map
     // logical: related to paths and walls in the map
 
-    const edges = createLogicalMap(width, height);
+    const edges = createLogicalMap(width, height, singlePath);
     const edge = new Edge(new Node(0, 0), new Node(0, 1));
     return generatePhysicalMapFromEdges(edges, width, height);
 }
 
-function createLogicalMap(width: number, height: number): Edge[] {
+function createLogicalMap(width: number, height: number, singlePath: boolean): Edge[] {
     const logicalWidth = converToLogicalLength(width);
     const logicalHeight = converToLogicalLength(height);
 
@@ -56,6 +56,10 @@ function createLogicalMap(width: number, height: number): Edge[] {
             if (!hitFirstEnd) {
                 hitFirstEnd = true;
                 lastNode.setToTarget();
+
+                if (singlePath) {
+                    break;
+                }
             }
             continue;
         } else {
@@ -101,7 +105,7 @@ class Node {
         const adjacentNodes = this.getAdjacentNodes(nodeMap);
         const unvisitedAdjacentNodes = adjacentNodes.filter(node => !node.visited);
         if (unvisitedAdjacentNodes.length > 0) {
-            const randomIndex = Math.floor(Math.random() * unvisitedAdjacentNodes.length);
+            const randomIndex = Math.round(Math.random() * (unvisitedAdjacentNodes.length-1));
             return unvisitedAdjacentNodes[randomIndex]!;
         } else {
             return null;
@@ -248,7 +252,7 @@ export default function MapGenerator(props: IMapGeneratorProps) {
 
     function clickGenerateMap() {
         console.log("generating...");
-        const _map = generateMap(width, height);
+        const _map = generateMap(width, height, true);
         setMap(_map);
 
         const mapDefinition = {map: _map, width: width, height: height, cellSize: cellSize};

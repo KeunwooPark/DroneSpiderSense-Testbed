@@ -4,6 +4,7 @@ config.game = {};
 config.game.camZoomLevel = 150;
 
 config.game.map = {};
+// width and height is better to be odd numbers.
 config.game.map.width = 11;
 config.game.map.height = 11;
 config.game.map.cellSize = 0.7;
