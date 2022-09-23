@@ -4,7 +4,7 @@ import { config } from "../utils/config";
 import IMapDefinition from "./IMapDefinition";
 import Map2DVisualizer from "./Map2DVisualizer";
 
-function generateMap(width: number, height: number, singlePath: boolean): number[][] {
+function generateMap(width: number, height: number, singlePath: boolean, pathAreaRatio: number = 0): number[][] {
     // backtracking algorithm to generate a map
 
     // The Algorithm
@@ -18,9 +18,21 @@ function generateMap(width: number, height: number, singlePath: boolean): number
     // physical: related to actual cells in the map
     // logical: related to paths and walls in the map
 
-    const edges = createLogicalMap(width, height, singlePath);
-    const edge = new Edge(new Node(0, 0), new Node(0, 1));
-    return generatePhysicalMapFromEdges(edges, width, height);
+    
+    let edges = createLogicalMap(width, height, singlePath);
+    let map = generatePhysicalMapFromEdges(edges, width, height);
+    
+    if (pathAreaRatio > 0) {
+        let pathArea = calculatePathAreaRatio(map);
+        while (pathArea < pathAreaRatio) {
+            edges = createLogicalMap(width, height, singlePath);
+            map = generatePhysicalMapFromEdges(edges, width, height);
+            pathArea = calculatePathAreaRatio(map);
+        }
+    }
+
+
+    return map;
 }
 
 function createLogicalMap(width: number, height: number, singlePath: boolean): Edge[] {
@@ -79,6 +91,23 @@ function converToLogicalLength(physicalLength: number): number {
     } else {
         return Math.ceil(physicalLength - 2 ) / 2;
     }
+}
+
+function calculatePathAreaRatio(map: number[][]): number {
+    if (map.length === 0 || map[0]!.length === 0) {
+        throw new Error("Empty map");
+    }
+
+    let pathArea = 0;
+    for (let i = 0; i < map.length; i++) {
+        for (let j = 0; j < map[i]!.length; j++) {
+            if (map[i]![j] === 0) {
+                pathArea++;
+            }
+        }
+    }
+
+    return pathArea / (map.length * map[0]!.length);
 }
 
 class Node {
@@ -251,8 +280,8 @@ export default function MapGenerator(props: IMapGeneratorProps) {
     const [map, setMap] = useState<number[][]>([]);
 
     function clickGenerateMap() {
-        console.log("generating...");
-        const _map = generateMap(width, height, true);
+        const minPathAreaRatio = config.game.map.minPathAreaRatio as number;
+        const _map = generateMap(width, height, true, minPathAreaRatio);
         setMap(_map);
 
         const mapDefinition = {map: _map, width: width, height: height, cellSize: cellSize};
