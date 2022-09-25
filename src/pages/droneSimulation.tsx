@@ -9,6 +9,7 @@ import IHapticPacket from "../components/IHapticPacket";
 import MapGenerator from "../components/MapGenerator";
 import IMapDefinition from "../components/IMapDefinition";
 import { config } from "../utils/config";
+import DroneSensorsHUD from "../components/DroneSensorsHud";
 
 const DroneSimulation: NextPage = () => {
     const [hideWalls, setHideWalls] = useState(false);
@@ -16,7 +17,7 @@ const DroneSimulation: NextPage = () => {
     const [hideSpheres, setHideSpheres] = useState(true);
     const [showAngleRange, setShowAngleRange] = useState(false);
     const [onlyFrontSensor, setOnlyFrontSensor] = useState(false);
-    const [firstPersonView, setFirstPersonView] = useState(false);
+    const [firstPersonView, setFirstPersonView] = useState(true);
     const [hapticPacketQueue, setHapticPacketQueue] = useState<IHapticPacket[]>([]);
     const [mapDefinition, setMapDefinition] = useState<IMapDefinition>({width: 0, height: 0, map: [], cellSize: config.game.map.cellSize as number});
     const [isLogging, setIsLogging] = useState(false);

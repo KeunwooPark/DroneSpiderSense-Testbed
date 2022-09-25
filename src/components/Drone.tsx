@@ -1,8 +1,8 @@
 import { SphereArgs, useSphere } from "@react-three/cannon";
-import { Box, Line, OrbitControls, OrthographicCamera, PerspectiveCamera, Sphere, Text } from "@react-three/drei";
-import { useFrame, useThree } from "@react-three/fiber";
-import { useEffect, useRef, useState } from "react";
-import { Camera, Euler, Layers, MathUtils, Mesh, Quaternion, Vector3 } from "three";
+import { Text } from "@react-three/drei";
+import { useFrame } from "@react-three/fiber";
+import { useEffect, useState } from "react";
+import { Euler, Layers, Mesh, Quaternion, Vector3 } from "three";
 import { distanceToIntensity, sensorIdToActuatorID } from "../utils/hapticRenderer";
 import DistanceSensor from "./DistanceSensor";
 import IHapticPacket from "./IHapticPacket";
@@ -10,6 +10,7 @@ import CameraControl from "./CameraControl";
 import { config } from "../utils/config";
 import DroneLog from "../utils/DroneLog";
 import saveAs from "file-saver";
+import DroneSensorsHUD from "./DroneSensorsHud";
 
 interface IDroneProps {
     hideRays: boolean;
@@ -38,6 +39,7 @@ export default function Drone(props: IDroneProps) {
 
     const [gamepadState, setGamepadState] = useState<IGamepadState>({xAxis: 0, yAxis: 0, yaw: 0});
     const [distanceSensors, setDistanceSensors] = useState<JSX.Element[]>([]);
+    const [distanceSensorDirections, setDistanceSensorDirections] = useState<Vector3[]>([]);
     const [logs, setLogs] = useState<DroneLog[]>([]);
     const [isLogging, setIsLogging] = useState(false);
     
@@ -120,13 +122,14 @@ export default function Drone(props: IDroneProps) {
         const distanceSensors: JSX.Element[] = [];
         const sensorDistance = config.drone.sensorDistance as number;
         const numProbes = config.drone.numProbes as number;
+        const sensorDirections: Vector3[] = [];
         for (let i = 0; i < numProbes; i++) {
             const angle = i * (2 * Math.PI / numProbes);
             const x = Math.cos(angle) * sensorDistance;
             const y = Math.sin(angle) * sensorDistance;
             const direction = new Vector3(x, y, 0);
             direction.normalize();
-            
+            sensorDirections.push(direction.clone());
             distanceSensors.push(<DistanceSensor key={`sensor-${i}`} 
                                                 id={i}
                                                 droneRef={droneRef} 
@@ -140,6 +143,7 @@ export default function Drone(props: IDroneProps) {
         }
         
         setDistanceSensors(distanceSensors);
+        setDistanceSensorDirections(sensorDirections);
     }, [props.hideRays, props.showAngleRange, props.hideSpheres]);
 
     useEffect(function logDroneState() {
@@ -175,7 +179,10 @@ export default function Drone(props: IDroneProps) {
 
     return (<>
                 <mesh ref={droneRef}>
-                    <CameraControl firstPersonView={props.firstPersonView} hideWalls={props.hideWalls}/>
+                    <CameraControl firstPersonView={props.firstPersonView} hideWalls={props.hideWalls} 
+                        hudSensorValues={[0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]}
+                        hudSensorDirections={distanceSensorDirections}
+                        />
                     <sphereGeometry args={droneArgs}/>
                     <pointLight position={[0, 0, 1]} />
                     <meshBasicMaterial attach="material" color={cellCollide? "red" : "blue"} />
