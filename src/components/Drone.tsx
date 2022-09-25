@@ -39,9 +39,10 @@ export default function Drone(props: IDroneProps) {
     const [gamepadState, setGamepadState] = useState<IGamepadState>({xAxis: 0, yAxis: 0, yaw: 0});
     const [distanceSensors, setDistanceSensors] = useState<JSX.Element[]>([]);
     const [distanceSensorDirections, setDistanceSensorDirections] = useState<Vector3[]>([]);
-    const [distanceSensorValues, setDistanceSensorValues] = useState<number[]>([]);
+    const [distanceSensorValues, setDistanceSensorValues] = useState<number[]>([0, 0, 0, 0, 0, 0, 0, 0]);
     const [logs, setLogs] = useState<DroneLog[]>([]);
     const [isLogging, setIsLogging] = useState(false);
+    const [hapticPacketsForHUD, setHapticPacketsForHUD] = useState<IHapticPacket[]>([]);
     
     const droneArgs: SphereArgs = [config.drone.size as number];
 
@@ -110,7 +111,6 @@ export default function Drone(props: IDroneProps) {
             setGamepadState({xAxis, yAxis, yaw});
         }
         
-
         requestAnimationFrame(pollGamepad);
     }
 
@@ -132,7 +132,7 @@ export default function Drone(props: IDroneProps) {
             const direction = new Vector3(x, y, 0);
             direction.normalize();
             sensorDirections.push(direction.clone());
-            sensorValues.push(50);
+            sensorValues.push(0);
             distanceSensors.push(<DistanceSensor key={`sensor-${i}`} 
                                                 id={i}
                                                 droneRef={droneRef} 
@@ -177,21 +177,15 @@ export default function Drone(props: IDroneProps) {
         }
 
         const intensity = distanceToIntensity(distance);
-        if (distanceSensorValues.length > 0) 
-        {
-            const sensorValues = distanceSensorValues.slice();
-            sensorValues[id] = intensity;
-            setDistanceSensorValues(sensorValues);
-        }
-
         const actuatorID = sensorIdToActuatorID(id);
+        hapticPacketsForHUD.push({actuatorID: id, intensity});
         props.hapticPacketQueue.push({actuatorID, intensity});
     }
 
     return (<>
                 <mesh ref={droneRef}>
                     <CameraControl firstPersonView={props.firstPersonView} hideWalls={props.hideWalls} 
-                        hudSensorValues={distanceSensorValues}
+                        hapticPacketsForHUD={hapticPacketsForHUD}
                         hudSensorDirections={distanceSensorDirections}
                     />
                     <sphereGeometry args={droneArgs}/>
