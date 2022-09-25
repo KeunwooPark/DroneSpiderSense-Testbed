@@ -1,6 +1,6 @@
 import { OrbitControls, OrthographicCamera, PerspectiveCamera } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { MathUtils, Vector3 } from "three";
 import { config } from "../utils/config";
@@ -16,6 +16,8 @@ const cellLayer = config.game.map.cellLayer;
 
 export default function CameraControl(props: ICameraControlProps) {
     const perspectiveCamRef = useRef(null);
+    const [hudSensorValues, setHudSensorValues] = useState<number[]>([]);
+
     useEffect(() => {
         if (perspectiveCamRef.current == null) {
             return;
@@ -33,9 +35,14 @@ export default function CameraControl(props: ICameraControlProps) {
         }
     });
 
+    useEffect(() => {
+        setHudSensorValues(props.hudSensorValues);
+        console.log("camera control hud sensor values changed");
+    }, [props.hudSensorValues]);
+
     return <>
         <PerspectiveCamera ref={perspectiveCamRef} makeDefault={props.firstPersonView} position={[0, 0, 0]}>
-            <DroneSensorsHUD sensorValues={props.hudSensorValues} sensorDirections={props.hudSensorDirections} />
+            <DroneSensorsHUD sensorValues={hudSensorValues} sensorDirections={props.hudSensorDirections} />
         </PerspectiveCamera>
         <OrthographicCamera position={[0, 0, 1]} zoom={config.game.camZoomLevel as number} makeDefault={!props.firstPersonView} />
         {/* <OrbitControls /> */}
