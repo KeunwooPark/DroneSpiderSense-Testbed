@@ -1,4 +1,4 @@
-import { Html } from "@react-three/drei";
+import { Box, Html } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Color, Scene, Vector2, Vector3 } from "three";
@@ -66,9 +66,13 @@ export default function DroneSensorsHUD(props: IDroneSensorsHUD) {
 
     return (
         <>
-        <Html position={[0, 0, 0]}>
-            <canvas ref={canvasRef} style={{backgroundColor: "white"}} width={`${hudWidth}`} height={`${hudHeight}`}></canvas>
-        </Html>
+        {/* box is for anchor. this helps for debugging. increase opacity to visualize */}
+        <Box position={[-0.3, 0.5, 0.23]} args={[0.1, 0.1, 0,1]}>
+            <meshBasicMaterial color={new Color("white")} transparent={true} opacity={0.3} />
+            <Html position={[0, 0, 0]}>
+                <canvas ref={canvasRef} style={{backgroundColor: "white"}} width={`${hudWidth}`} height={`${hudHeight}`}></canvas>
+            </Html>
+        </Box>
         </>
     );
 }
