@@ -1,7 +1,7 @@
 import { Html } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
-import { useEffect, useRef, useState } from "react";
-import { Vector2, Vector3 } from "three";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Color, Scene, Vector2, Vector3 } from "three";
 import IHapticPacket from "./IHapticPacket";
 
 interface IDroneSensorsHUD {
@@ -34,52 +34,42 @@ export default function DroneSensorsHUD(props: IDroneSensorsHUD) {
         }
 
         setSensorValues(prevSensorValues);
-        console.log(prevSensorValues);
     });
 
-    // useEffect(() => {
-    //     const numSensorValues = props.sensorValues.length;
-    //     if (numSensorValues === 0) {
-    //         console.log("no values");
-    //         return;
-    //     }
-        
-    //     const canvas = canvasRef.current;
-    //     if (canvas == null) {
-    //         console.log("no canvas");
-    //         return;
-    //     }
-        
-    //     const ctx = canvas.getContext("2d");
-    //     if (ctx == null) {
-    //         console.log("no context");
-    //         return;
-    //     }
-        
-    //     ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-    //     const sensorValues = props.sensorValues;
-    //     const sensorDirections = props.sensorDirections;
-        
-    //     const maxLength = 80;
-    //     ctx.beginPath();
-    //     for (let i=0; i<numSensorValues; i++) {
-    //         const lineStart = new Vector2(hudWidth/2, hudHeight/2);
-    //         const lineDirection = new Vector2(sensorDirections[i]!.x, sensorDirections[i]!.y);
-    //         console.log("sensor value:", i, sensorValues[i]);
-    //         const lineLength = (sensorValues[i]! / 100) * maxLength;
-    //         const lineEnd = lineDirection.multiplyScalar(lineLength).add(lineStart);
+    useEffect(() => {
+        if (canvasRef.current == null) {
+            return;
+        }
 
-    //         ctx.moveTo(lineStart.x, lineStart.y);
-    //         ctx.lineTo(lineEnd.x, lineEnd.y);
-    //     }
-    //     ctx.stroke();
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext("2d");
+        if (ctx == null) {
+            return;
+        }
 
-    // }, [props.sensorDirections]);
+        ctx.clearRect(0, 0, hudWidth, hudHeight);
+
+        for (let i=0; i<sensorDirections.length; i++) {
+            const dir = sensorDirections[i]!;
+            const value = sensorValues[i]!;
+            const startPoint = new Vector2(hudWidth/2, hudHeight/2);
+            const magnitude = value * hudWidth / 2; 
+            // flip y axis, to match the canvas coordinate.
+            const endPoint = new Vector2(dir.x, -dir.y).multiplyScalar(magnitude).add(startPoint.clone());
+            
+            ctx.beginPath();
+            ctx.moveTo(startPoint.x, startPoint.y);
+            ctx.lineTo(endPoint.x, endPoint.y);
+            ctx.stroke();
+        }
+    }, [sensorValues]);
 
     return (
-        <Html position={[-5.0, 3.75, 0]}>
+        <>
+        <Html position={[0, 0, 0]}>
             <canvas ref={canvasRef} style={{backgroundColor: "white"}} width={`${hudWidth}`} height={`${hudHeight}`}></canvas>
         </Html>
+        </>
     );
 }
+

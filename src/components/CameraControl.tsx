@@ -37,9 +37,7 @@ export default function CameraControl(props: ICameraControlProps) {
     });
 
     return <>
-        <PerspectiveCamera ref={perspectiveCamRef} makeDefault={props.firstPersonView} position={[0, 0, 0]}>
-            <DroneSensorsHUD hapticPackets={props.hapticPacketsForHUD} sensorDirections={props.hudSensorDirections} />
-        </PerspectiveCamera>
+        <PerspectiveCamera ref={perspectiveCamRef} makeDefault={props.firstPersonView} position={[0, 0, 0]} />
         <OrthographicCamera position={[0, 0, 1]} zoom={config.game.camZoomLevel as number} makeDefault={!props.firstPersonView} />
         {/* <OrbitControls /> */}
     </>

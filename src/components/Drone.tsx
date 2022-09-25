@@ -1,5 +1,5 @@
 import { SphereArgs, useSphere } from "@react-three/cannon";
-import { Text } from "@react-three/drei";
+import { Html, Text } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useEffect, useState } from "react";
 import { Euler, Layers, Mesh, Quaternion, Vector3 } from "three";
@@ -10,6 +10,7 @@ import CameraControl from "./CameraControl";
 import { config } from "../utils/config";
 import DroneLog from "../utils/DroneLog";
 import saveAs from "file-saver";
+import DroneSensorsHUD from "./DroneSensorsHud";
 
 interface IDroneProps {
     hideRays: boolean;
@@ -178,7 +179,8 @@ export default function Drone(props: IDroneProps) {
 
         const intensity = distanceToIntensity(distance);
         const actuatorID = sensorIdToActuatorID(id);
-        hapticPacketsForHUD.push({actuatorID: id, intensity});
+        const maxIntensity = config.haptic.maxIntensity as number;
+        hapticPacketsForHUD.push({actuatorID: id, intensity: intensity / maxIntensity});
         props.hapticPacketQueue.push({actuatorID, intensity});
     }
 
@@ -192,6 +194,8 @@ export default function Drone(props: IDroneProps) {
                     <pointLight position={[0, 0, 1]} />
                     <meshBasicMaterial attach="material" color={cellCollide? "red" : "blue"} />
                     <HeadupNoti position={[0, 0.1, 0]} visible={cellCollide || targetCollide} message={targetCollide? "found target":"collision"} />
+                    <DroneSensorsHUD hapticPackets={hapticPacketsForHUD} sensorDirections={distanceSensorDirections} />
+                    
                     {props.onlyFrontSensor? distanceSensors[2] : distanceSensors}
                 </mesh>
             </>);
