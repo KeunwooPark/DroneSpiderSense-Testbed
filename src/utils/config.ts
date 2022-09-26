@@ -23,5 +23,10 @@ config.drone.thumbstickDeadzone = 0.15;
 config.drone.sensor = {};
 config.drone.sensor.numSubRays = 5;
 
+config.haptic = {}
+config.haptic.maxDistance = 0.35;
+config.haptic.minIntensity = 0;
+config.haptic.maxIntensity = 50;
+
 config.serial = {};
 config.serial.pollInterval = 1; //ms

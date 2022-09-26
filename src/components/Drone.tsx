@@ -1,5 +1,5 @@
 import { SphereArgs, useSphere } from "@react-three/cannon";
-import { Text } from "@react-three/drei";
+import { Html, Text } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useEffect, useState } from "react";
 import { Euler, Layers, Mesh, Quaternion, Vector3 } from "three";
@@ -10,6 +10,8 @@ import CameraControl from "./CameraControl";
 import { config } from "../utils/config";
 import DroneLog from "../utils/DroneLog";
 import saveAs from "file-saver";
+import DroneSensorsVisualizer from "./DroneSensorsVisualizer";
+import { calculateSensorDirection } from "../utils/Sensor";
 
 interface IDroneProps {
     hideRays: boolean;
@@ -17,6 +19,7 @@ interface IDroneProps {
     onlyFrontSensor: boolean;
     hideSpheres: boolean;
     hapticPacketQueue: IHapticPacket[];
+    sensorVisualizationQueue: IHapticPacket[];
     firstPersonView: boolean;
     hideWalls: boolean;
     logging: boolean;
@@ -39,7 +42,7 @@ export default function Drone(props: IDroneProps) {
     const [gamepadState, setGamepadState] = useState<IGamepadState>({xAxis: 0, yAxis: 0, yaw: 0});
     const [distanceSensors, setDistanceSensors] = useState<JSX.Element[]>([]);
     const [distanceSensorDirections, setDistanceSensorDirections] = useState<Vector3[]>([]);
-    const [distanceSensorValues, setDistanceSensorValues] = useState<number[]>([]);
+    const [distanceSensorValues, setDistanceSensorValues] = useState<number[]>([0, 0, 0, 0, 0, 0, 0, 0]);
     const [logs, setLogs] = useState<DroneLog[]>([]);
     const [isLogging, setIsLogging] = useState(false);
     
@@ -110,7 +113,6 @@ export default function Drone(props: IDroneProps) {
             setGamepadState({xAxis, yAxis, yaw});
         }
         
-
         requestAnimationFrame(pollGamepad);
     }
 
@@ -126,13 +128,14 @@ export default function Drone(props: IDroneProps) {
         const sensorValues: number[] = [];
 
         for (let i = 0; i < numProbes; i++) {
-            const angle = i * (2 * Math.PI / numProbes);
-            const x = Math.cos(angle) * sensorDistance;
-            const y = Math.sin(angle) * sensorDistance;
-            const direction = new Vector3(x, y, 0);
-            direction.normalize();
+            // const angle = i * (2 * Math.PI / numProbes);
+            // const x = Math.cos(angle) * sensorDistance;
+            // const y = Math.sin(angle) * sensorDistance;
+            // const direction = new Vector3(x, y, 0);
+            // direction.normalize();
+            const direction = calculateSensorDirection(i);
             sensorDirections.push(direction.clone());
-            sensorValues.push(50);
+            sensorValues.push(0);
             distanceSensors.push(<DistanceSensor key={`sensor-${i}`} 
                                                 id={i}
                                                 droneRef={droneRef} 
@@ -177,27 +180,19 @@ export default function Drone(props: IDroneProps) {
         }
 
         const intensity = distanceToIntensity(distance);
-        if (distanceSensorValues.length > 0) 
-        {
-            const sensorValues = distanceSensorValues.slice();
-            sensorValues[id] = intensity;
-            setDistanceSensorValues(sensorValues);
-        }
-
         const actuatorID = sensorIdToActuatorID(id);
+        const maxIntensity = config.haptic.maxIntensity as number;
+        props.sensorVisualizationQueue.push({actuatorID: id, intensity: intensity / maxIntensity});
         props.hapticPacketQueue.push({actuatorID, intensity});
     }
 
     return (<>
                 <mesh ref={droneRef}>
-                    <CameraControl firstPersonView={props.firstPersonView} hideWalls={props.hideWalls} 
-                        hudSensorValues={distanceSensorValues}
-                        hudSensorDirections={distanceSensorDirections}
-                    />
+                    <CameraControl firstPersonView={props.firstPersonView} hideWalls={props.hideWalls} />
                     <sphereGeometry args={droneArgs}/>
                     <pointLight position={[0, 0, 1]} />
                     <meshBasicMaterial attach="material" color={cellCollide? "red" : "blue"} />
-                    <HeadupNoti position={[0, 0.1, 0]} visible={cellCollide || targetCollide} message={targetCollide? "found target":"collision"} />
+                    <HeadupNoti position={[0, 0.1, 0]} visible={cellCollide || targetCollide} message={targetCollide? "found target":"collision"} />                    
                     {props.onlyFrontSensor? distanceSensors[2] : distanceSensors}
                 </mesh>
             </>);

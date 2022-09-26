@@ -4,19 +4,17 @@ import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { MathUtils, Vector3 } from "three";
 import { config } from "../utils/config";
-import DroneSensorsHUD from "./DroneSensorsHud";
+import DroneSensorsVisualizer from "./DroneSensorsVisualizer";
+import IHapticPacket from "./IHapticPacket";
 interface ICameraControlProps {
     firstPersonView: boolean;
     hideWalls: boolean;
-    hudSensorValues: number[];
-    hudSensorDirections: Vector3[];
 }
 
 const cellLayer = config.game.map.cellLayer;
 
 export default function CameraControl(props: ICameraControlProps) {
     const perspectiveCamRef = useRef(null);
-    const [hudSensorValues, setHudSensorValues] = useState<number[]>([]);
 
     useEffect(() => {
         if (perspectiveCamRef.current == null) {
@@ -35,15 +33,8 @@ export default function CameraControl(props: ICameraControlProps) {
         }
     });
 
-    useEffect(() => {
-        setHudSensorValues(props.hudSensorValues);
-        console.log("camera control hud sensor values changed");
-    }, [props.hudSensorValues]);
-
     return <>
-        <PerspectiveCamera ref={perspectiveCamRef} makeDefault={props.firstPersonView} position={[0, 0, 0]}>
-            <DroneSensorsHUD sensorValues={hudSensorValues} sensorDirections={props.hudSensorDirections} />
-        </PerspectiveCamera>
+        <PerspectiveCamera ref={perspectiveCamRef} makeDefault={props.firstPersonView} position={[0, 0, 0]} />
         <OrthographicCamera position={[0, 0, 1]} zoom={config.game.camZoomLevel as number} makeDefault={!props.firstPersonView} />
         {/* <OrbitControls /> */}
     </>

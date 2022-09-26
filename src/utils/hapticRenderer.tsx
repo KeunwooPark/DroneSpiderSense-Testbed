@@ -1,6 +1,8 @@
-export const maxDistance = 0.35;
-export const minIntensity = 0;
-export const maxIntensity = 50;
+import { config } from "./config";
+
+const maxDistance = config.haptic.maxDistance as number;
+const minIntensity = config.haptic.minIntensity as number;
+const maxIntensity = config.haptic.maxIntensity as number;
 
 export function distanceToIntensity(distance: number) {
     const reverseDistance = maxDistance - distance;

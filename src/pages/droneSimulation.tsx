@@ -9,7 +9,7 @@ import IHapticPacket from "../components/IHapticPacket";
 import MapGenerator from "../components/MapGenerator";
 import IMapDefinition from "../components/IMapDefinition";
 import { config } from "../utils/config";
-import DroneSensorsHUD from "../components/DroneSensorsHud";
+import DroneSensorsVisualizer from "../components/DroneSensorsVisualizer";
 
 const DroneSimulation: NextPage = () => {
     const [hideWalls, setHideWalls] = useState(false);
@@ -19,6 +19,7 @@ const DroneSimulation: NextPage = () => {
     const [onlyFrontSensor, setOnlyFrontSensor] = useState(false);
     const [firstPersonView, setFirstPersonView] = useState(true);
     const [hapticPacketQueue, setHapticPacketQueue] = useState<IHapticPacket[]>([]);
+    const [sensorVisualizationQueue, setSensorVisualizationQueue] = useState<IHapticPacket[]>([]);
     const [mapDefinition, setMapDefinition] = useState<IMapDefinition>({width: 0, height: 0, map: [], cellSize: config.game.map.cellSize as number});
     const [isLogging, setIsLogging] = useState(false);
 
@@ -85,17 +86,19 @@ const DroneSimulation: NextPage = () => {
             
             <SerialCom pollInterval={config.serial.pollInterval} hapticPacketQueue={hapticPacketQueue} baudRate={115200} />
             <button className="btn btn-primary mb-3" onClick={() => {setIsLogging(!isLogging)}}>{isLogging? "stop logging":"start logging"}</button>
-            
-            <div className="w-1/2 h-1/2">
-                <Canvas className="">
-                    <fog attach="fog" color="black" near={0} far={5} />
-                    <color args={["#000000"]} attach="background" />
-                    <Physics>
-                        {/* <ambientLight color={"#FFFFFF"} /> */}
-                        <Drone hideRays={hideRays} showAngleRange={showAngleRange} onlyFrontSensor={onlyFrontSensor} hapticPacketQueue={hapticPacketQueue} hideSpheres={hideSpheres} firstPersonView={firstPersonView} hideWalls={hideWalls} logging={isLogging} />
-                        <GameMap mapDefinition={mapDefinition} />
-                    </Physics>
-                </Canvas>
+            <div className="grid grid-cols-4 h-1/2">
+                <div className="col-span-3">
+                    <Canvas className="">
+                        <fog attach="fog" color="black" near={0} far={5} />
+                        <color args={["#000000"]} attach="background" />
+                        <Physics>
+                            {/* <ambientLight color={"#FFFFFF"} /> */}
+                            <Drone hideRays={hideRays} showAngleRange={showAngleRange} onlyFrontSensor={onlyFrontSensor} hapticPacketQueue={hapticPacketQueue} sensorVisualizationQueue={sensorVisualizationQueue} hideSpheres={hideSpheres} firstPersonView={firstPersonView} hideWalls={hideWalls} logging={isLogging} />
+                            <GameMap mapDefinition={mapDefinition} />
+                        </Physics>
+                    </Canvas>
+                </div>
+                <DroneSensorsVisualizer hapticPackets={sensorVisualizationQueue}/>
             </div>
             <div className="my-3">
                 <MapGenerator onMapGenerated={onMapGenerated} />
