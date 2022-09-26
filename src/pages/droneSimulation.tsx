@@ -16,6 +16,7 @@ const DroneSimulation: NextPage = () => {
     const [hideRays, setHideRays] = useState(false);
     const [hideSpheres, setHideSpheres] = useState(true);
     const [showAngleRange, setShowAngleRange] = useState(false);
+    const [showSideSensorVisualization, setShowSideSensorVisualization] = useState(false);
     const [onlyFrontSensor, setOnlyFrontSensor] = useState(false);
     const [firstPersonView, setFirstPersonView] = useState(true);
     const [hapticPacketQueue, setHapticPacketQueue] = useState<IHapticPacket[]>([]);
@@ -45,6 +46,10 @@ const DroneSimulation: NextPage = () => {
 
     function firstPersionViewChanged() {
         setFirstPersonView(!firstPersonView);
+    }
+
+    function showSideSensorVisualizationChanged() {
+        setShowSideSensorVisualization(!showSideSensorVisualization);
     }
 
     function onMapGenerated(mapDefinition: IMapDefinition) {
@@ -83,6 +88,11 @@ const DroneSimulation: NextPage = () => {
                 <div>first person view</div> 
                 <input type="checkbox" className="toggle" checked={firstPersonView} onChange={firstPersionViewChanged} />
             </div>
+
+            <div className="ml-3">
+                <div>show side sensor visualization</div> 
+                <input type="checkbox" className="toggle" checked={showSideSensorVisualization} onChange={showSideSensorVisualizationChanged} />
+            </div>
             
             <SerialCom pollInterval={config.serial.pollInterval} hapticPacketQueue={hapticPacketQueue} baudRate={115200} />
             <button className="btn btn-primary mb-3" onClick={() => {setIsLogging(!isLogging)}}>{isLogging? "stop logging":"start logging"}</button>
@@ -98,7 +108,7 @@ const DroneSimulation: NextPage = () => {
                         </Physics>
                     </Canvas>
                 </div>
-                <DroneSensorsVisualizer hapticPackets={sensorVisualizationQueue}/>
+                {showSideSensorVisualization? <DroneSensorsVisualizer hapticPackets={sensorVisualizationQueue}/>:<></>}
             </div>
             <div className="my-3">
                 <MapGenerator onMapGenerated={onMapGenerated} />
