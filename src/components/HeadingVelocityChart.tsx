@@ -1,6 +1,7 @@
 import * as d3 from "d3";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Vector3 } from "three";
+import { radToDeg } from "three/src/math/MathUtils";
 import DroneLog from "../utils/DroneLog";
 
 interface IHeadingVelocityChartProps {
@@ -21,6 +22,9 @@ export default function HeadingVelocityChart(props: IHeadingVelocityChartProps) 
     // margin is necessary to avoid cutting off the axis labels.
     const margine = {top: 10, right: 30, bottom: 30, left: 60};
 
+    const [average, setAverage] = useState<number>(0);
+    const [std, setSTD] = useState<number>(0);
+
     useEffect(() => {
         if (containerRef.current == null) {
             return;
@@ -34,7 +38,7 @@ export default function HeadingVelocityChart(props: IHeadingVelocityChartProps) 
             if (velocity.length() > 0) {
                 angle = heading.clone().angleTo(velocity);
             }
-            
+
             return {
                 index: i,
                 heading,
@@ -54,7 +58,7 @@ export default function HeadingVelocityChart(props: IHeadingVelocityChartProps) 
         const xAxis = d3.scaleLinear().range([0, width]).domain(d3.extent(data, d => d.index) as [number, number]);
         const minAngle = d3.min(data, d => {return d.angle})!
         const maxAngle = d3.max(data, d => {return d.angle})!
-        console.log(data);
+        
         const yAxis = d3.scaleLinear().domain([minAngle, maxAngle]).range([0, height]);
 
         svg.append("g").call(d3.axisBottom(xAxis)).attr("transform", `translate(0, ${height})`);
@@ -66,6 +70,12 @@ export default function HeadingVelocityChart(props: IHeadingVelocityChartProps) 
         svg.append("path").datum(data).attr("fill", "none").attr("stroke", "steelblue").attr("stroke-width", 1.5)
             .attr("d", line);
 
+        const averageAngle = d3.mean(data, d => d.angle)!;
+        setAverage(averageAngle);
+
+        const stdAngle = d3.deviation(data, d => d.angle)!;
+        setSTD(stdAngle);
+
         return () => {
             if (containerRef.current != null) {
                 containerRef.current.removeChild(containerRef.current.firstChild as Node);
@@ -74,7 +84,11 @@ export default function HeadingVelocityChart(props: IHeadingVelocityChartProps) 
     }, [props.droneLogs]);
 
     return (
-        <div ref={containerRef}>
-        </div>
+        <>
+            <div ref={containerRef}>
+            </div>
+            <div>{`average: ${average} rad = ${radToDeg(average)} deg`}</div>
+            <div>{`std: ${std} rad  = ${radToDeg(std)} deg`}</div>
+        </>
     );
 } 
