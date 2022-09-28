@@ -15,7 +15,7 @@ const Analysys: NextPage = () => {
                 return;
             }
             const droneLogAsString = (e.target.result as string).trim().split("\n");
-            const droneLogs = droneLogAsString.map(ls => JSON.parse(ls));
+            const droneLogs = droneLogAsString.map(ls => DroneLog.parse(ls));
             setDroneLogs(droneLogs);
         }
 

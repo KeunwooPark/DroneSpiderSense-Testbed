@@ -10,6 +10,7 @@ import MapGenerator from "../components/MapGenerator";
 import IMapDefinition from "../components/IMapDefinition";
 import { config } from "../utils/config";
 import DroneSensorsVisualizer from "../components/DroneSensorsVisualizer";
+import { AxesHelper } from "three";
 
 const DroneSimulation: NextPage = () => {
     const [hideWalls, setHideWalls] = useState(false);
