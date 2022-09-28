@@ -10,7 +10,6 @@ import CameraControl from "./CameraControl";
 import { config } from "../utils/config";
 import DroneLog from "../utils/DroneLog";
 import saveAs from "file-saver";
-import DroneSensorsVisualizer from "./DroneSensorsVisualizer";
 import { calculateSensorDirection } from "../utils/Sensor";
 
 interface IDroneProps {
@@ -41,8 +40,6 @@ export default function Drone(props: IDroneProps) {
 
     const [gamepadState, setGamepadState] = useState<IGamepadState>({xAxis: 0, yAxis: 0, yaw: 0});
     const [distanceSensors, setDistanceSensors] = useState<JSX.Element[]>([]);
-    const [distanceSensorDirections, setDistanceSensorDirections] = useState<Vector3[]>([]);
-    const [distanceSensorValues, setDistanceSensorValues] = useState<number[]>([0, 0, 0, 0, 0, 0, 0, 0]);
     const [logs, setLogs] = useState<DroneLog[]>([]);
     const [isLogging, setIsLogging] = useState(false);
     
@@ -147,9 +144,6 @@ export default function Drone(props: IDroneProps) {
                                                 showSphere={!props.hideSpheres}
                                                 onDistanceChange={onSensorDistanceChange}/>);
         }
-        
-        setDistanceSensorDirections(sensorDirections);
-        setDistanceSensorValues(sensorValues);
         setDistanceSensors(distanceSensors);
     }, [props.hideRays, props.showAngleRange, props.hideSpheres]);
 

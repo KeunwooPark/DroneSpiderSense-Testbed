@@ -11,6 +11,7 @@ import IMapDefinition from "../components/IMapDefinition";
 import { config } from "../utils/config";
 import DroneSensorsVisualizer from "../components/DroneSensorsVisualizer";
 import { AxesHelper } from "three";
+import { saveAs } from "file-saver";
 
 const DroneSimulation: NextPage = () => {
     const [hideWalls, setHideWalls] = useState(false);
@@ -57,6 +58,21 @@ const DroneSimulation: NextPage = () => {
         setMapDefinition(mapDefinition);
     }
 
+    function loggingOnClick() {
+
+        if (isLogging) {
+            saveMapDefinition();
+        }
+
+        setIsLogging(!isLogging);
+    }
+
+    function saveMapDefinition() {
+        const mapDefinitionAsString = JSON.stringify(mapDefinition);
+        const file = new Blob([mapDefinitionAsString], {type: 'text/plain;charset=utf-8'});
+        saveAs(file, "mapDefinition.json");
+    }
+
     return (
         <div className="container mx-auto h-screen">
             <h1 className="text-5xl">drone simulation</h1>
@@ -96,7 +112,7 @@ const DroneSimulation: NextPage = () => {
             </div>
             
             <SerialCom pollInterval={config.serial.pollInterval} hapticPacketQueue={hapticPacketQueue} baudRate={115200} />
-            <button className="btn btn-primary mb-3" onClick={() => {setIsLogging(!isLogging)}}>{isLogging? "stop logging":"start logging"}</button>
+            <button className="btn btn-primary mb-3" onClick={loggingOnClick}>{isLogging? "stop logging":"start logging"}</button>
             <div className="grid grid-cols-4 h-1/2">
                 <div className="col-span-3">
                     <Canvas className="">
