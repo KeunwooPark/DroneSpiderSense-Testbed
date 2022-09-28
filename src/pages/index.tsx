@@ -23,6 +23,9 @@ const Home: NextPage = () => {
             <li className="text-lg">
               <Link href={"droneSimulation"}>drone simulation</Link>
             </li>
+            <li className="text-lg">
+              <Link href={"analysis"}>analysys</Link>
+            </li>
           </ul>
         </div>
       </div>
