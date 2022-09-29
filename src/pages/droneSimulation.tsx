@@ -9,8 +9,6 @@ import IHapticPacket from "../components/IHapticPacket";
 import MapGenerator from "../components/MapGenerator";
 import IMapDefinition from "../components/IMapDefinition";
 import { config } from "../utils/config";
-import DroneSensorsVisualizer from "../components/DroneSensorsVisualizer";
-import { AxesHelper } from "three";
 import { saveAs } from "file-saver";
 
 const DroneSimulation: NextPage = () => {
