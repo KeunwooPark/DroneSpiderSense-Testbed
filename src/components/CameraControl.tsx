@@ -2,10 +2,8 @@ import { OrbitControls, OrthographicCamera, PerspectiveCamera } from "@react-thr
 import { useThree } from "@react-three/fiber";
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
-import { MathUtils, Vector3 } from "three";
+import { MathUtils} from "three";
 import { config } from "../utils/config";
-import DroneSensorsVisualizer from "./DroneSensorsVisualizer";
-import IHapticPacket from "./IHapticPacket";
 interface ICameraControlProps {
     firstPersonView: boolean;
     hideWalls: boolean;

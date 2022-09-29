@@ -11,6 +11,7 @@ import { config } from "../utils/config";
 import DroneLog from "../utils/DroneLog";
 import saveAs from "file-saver";
 import { calculateSensorDirection } from "../utils/Sensor";
+import DroneSensorHUD from "./DroneSensorHUD";
 
 interface IDroneProps {
     hideRays: boolean;
@@ -18,10 +19,10 @@ interface IDroneProps {
     onlyFrontSensor: boolean;
     hideSpheres: boolean;
     hapticPacketQueue: IHapticPacket[];
-    sensorVisualizationQueue: IHapticPacket[];
     firstPersonView: boolean;
     hideWalls: boolean;
     logging: boolean;
+    showSensorHUD: boolean;
 }
 
 interface IGamepadState {
@@ -40,6 +41,7 @@ export default function Drone(props: IDroneProps) {
 
     const [gamepadState, setGamepadState] = useState<IGamepadState>({xAxis: 0, yAxis: 0, yaw: 0});
     const [distanceSensors, setDistanceSensors] = useState<JSX.Element[]>([]);
+    const [sensorDataQueue, setSensorDataQueue] = useState<IHapticPacket[]>([]);
     const [logs, setLogs] = useState<DroneLog[]>([]);
     const [isLogging, setIsLogging] = useState(false);
     
@@ -176,7 +178,7 @@ export default function Drone(props: IDroneProps) {
         const intensity = distanceToIntensity(distance);
         const actuatorID = sensorIdToActuatorID(id);
         const maxIntensity = config.haptic.maxIntensity as number;
-        props.sensorVisualizationQueue.push({actuatorID: id, intensity: intensity / maxIntensity});
+        sensorDataQueue.push({actuatorID: id, intensity: intensity / maxIntensity});
         props.hapticPacketQueue.push({actuatorID, intensity});
     }
 
@@ -188,6 +190,7 @@ export default function Drone(props: IDroneProps) {
                     <meshBasicMaterial attach="material" color={cellCollide? "red" : "blue"} />
                     <HeadupNoti position={[0, 0.1, 0]} visible={cellCollide || targetCollide} message={targetCollide? "found target":"collision"} />                    
                     {props.onlyFrontSensor? distanceSensors[2] : distanceSensors}
+                    {props.showSensorHUD? <DroneSensorHUD sensorDataQueue={sensorDataQueue} distance={0.1} size={0.04} />:<></>}
                 </mesh>
             </>);
 }

@@ -18,11 +18,10 @@ const DroneSimulation: NextPage = () => {
     const [hideRays, setHideRays] = useState(false);
     const [hideSpheres, setHideSpheres] = useState(true);
     const [showAngleRange, setShowAngleRange] = useState(false);
-    const [showSideSensorVisualization, setShowSideSensorVisualization] = useState(false);
+    const [showSensorHUD, setShowSensorHUD] = useState(false);
     const [onlyFrontSensor, setOnlyFrontSensor] = useState(false);
     const [firstPersonView, setFirstPersonView] = useState(true);
     const [hapticPacketQueue, setHapticPacketQueue] = useState<IHapticPacket[]>([]);
-    const [sensorVisualizationQueue, setSensorVisualizationQueue] = useState<IHapticPacket[]>([]);
     const [mapDefinition, setMapDefinition] = useState<IMapDefinition>({width: 0, height: 0, map: [], cellSize: config.game.map.cellSize as number});
     const [isLogging, setIsLogging] = useState(false);
 
@@ -51,7 +50,7 @@ const DroneSimulation: NextPage = () => {
     }
 
     function showSideSensorVisualizationChanged() {
-        setShowSideSensorVisualization(!showSideSensorVisualization);
+        setShowSensorHUD(!showSensorHUD);
     }
 
     function onMapGenerated(mapDefinition: IMapDefinition) {
@@ -108,7 +107,7 @@ const DroneSimulation: NextPage = () => {
 
             <div className="ml-3">
                 <div>show side sensor visualization</div> 
-                <input type="checkbox" className="toggle" checked={showSideSensorVisualization} onChange={showSideSensorVisualizationChanged} />
+                <input type="checkbox" className="toggle" checked={showSensorHUD} onChange={showSideSensorVisualizationChanged} />
             </div>
             
             <SerialCom pollInterval={config.serial.pollInterval} hapticPacketQueue={hapticPacketQueue} baudRate={115200} />
@@ -120,12 +119,11 @@ const DroneSimulation: NextPage = () => {
                         <color args={["#000000"]} attach="background" />
                         <Physics>
                             {/* <ambientLight color={"#FFFFFF"} /> */}
-                            <Drone hideRays={hideRays} showAngleRange={showAngleRange} onlyFrontSensor={onlyFrontSensor} hapticPacketQueue={hapticPacketQueue} sensorVisualizationQueue={sensorVisualizationQueue} hideSpheres={hideSpheres} firstPersonView={firstPersonView} hideWalls={hideWalls} logging={isLogging} />
+                            <Drone hideRays={hideRays} showAngleRange={showAngleRange} onlyFrontSensor={onlyFrontSensor} hapticPacketQueue={hapticPacketQueue} hideSpheres={hideSpheres} firstPersonView={firstPersonView} hideWalls={hideWalls} logging={isLogging} showSensorHUD={showSensorHUD} />
                             <GameMap mapDefinition={mapDefinition} />
                         </Physics>
                     </Canvas>
                 </div>
-                {showSideSensorVisualization? <DroneSensorsVisualizer hapticPackets={sensorVisualizationQueue}/>:<></>}
             </div>
             <div className="my-3">
                 <MapGenerator onMapGenerated={onMapGenerated} />
