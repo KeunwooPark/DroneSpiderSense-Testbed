@@ -3,6 +3,7 @@ import { Vector2 } from "three";
 import { config } from "../utils/config";
 import IMapDefinition from "./IMapDefinition";
 import Map2DVisualizer from "./Map2DVisualizer";
+import random from "random";
 
 function generateMap(width: number, height: number, singlePath: boolean, pathAreaRatio: number = 0): number[][] {
     // backtracking algorithm to generate a map
@@ -134,7 +135,11 @@ class Node {
         const adjacentNodes = this.getAdjacentNodes(nodeMap);
         const unvisitedAdjacentNodes = adjacentNodes.filter(node => !node.visited);
         if (unvisitedAdjacentNodes.length > 0) {
-            const randomIndex = Math.round(Math.random() * (unvisitedAdjacentNodes.length-1));
+            const randomIndex = random.int(0, unvisitedAdjacentNodes.length - 1);
+            // let randomIndex = Math.floor(Math.random() * (unvisitedAdjacentNodes.length));
+            // if (randomIndex >= unvisitedAdjacentNodes.length) {
+            //     randomIndex = unvisitedAdjacentNodes.length - 1;
+            // }
             return unvisitedAdjacentNodes[randomIndex]!;
         } else {
             return null;
