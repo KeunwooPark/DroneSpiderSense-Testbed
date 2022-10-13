@@ -136,10 +136,6 @@ class Node {
         const unvisitedAdjacentNodes = adjacentNodes.filter(node => !node.visited);
         if (unvisitedAdjacentNodes.length > 0) {
             const randomIndex = random.int(0, unvisitedAdjacentNodes.length - 1);
-            // let randomIndex = Math.floor(Math.random() * (unvisitedAdjacentNodes.length));
-            // if (randomIndex >= unvisitedAdjacentNodes.length) {
-            //     randomIndex = unvisitedAdjacentNodes.length - 1;
-            // }
             return unvisitedAdjacentNodes[randomIndex]!;
         } else {
             return null;

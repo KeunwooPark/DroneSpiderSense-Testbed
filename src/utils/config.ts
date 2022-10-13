@@ -7,12 +7,12 @@ config.game.map = {};
 // width and height is better to be odd numbers.
 config.game.map.width = 41;
 config.game.map.height = 41;
-config.game.map.cellSize = 0.05;
+config.game.map.cellSize = 0.2;
 config.game.map.cellLayer = 1;
 config.game.map.minPathAreaRatio = 0.1;
 
 config.drone = {};
-config.drone.size = 0.1;
+config.drone.size = 0.1; // radius
 config.drone.numProbes = 8;
 config.drone.sensorDistance = 0.3;
 config.drone.speedGain = 0.4;
