@@ -20,6 +20,7 @@ const DroneSimulation: NextPage = () => {
   const [showSensorHUD, setShowSensorHUD] = useState(false);
   const [onlyFrontSensor, setOnlyFrontSensor] = useState(false);
   const [firstPersonView, setFirstPersonView] = useState(true);
+  const [orbitControls, setOrbitControls] = useState(false);
   const [hapticPacketQueue, setHapticPacketQueue] = useState<IHapticPacket[]>(
     []
   );
@@ -53,6 +54,10 @@ const DroneSimulation: NextPage = () => {
 
   function firstPersionViewChanged() {
     setFirstPersonView(!firstPersonView);
+  }
+
+  function orbitControlsChanged() {
+    setOrbitControls(!orbitControls);
   }
 
   function showSideSensorVisualizationChanged() {
@@ -143,6 +148,16 @@ const DroneSimulation: NextPage = () => {
       </div>
 
       <div className="ml-3">
+        <div>orbit controls</div>
+        <input
+          type="checkbox"
+          className="toggle"
+          checked={orbitControls}
+          onChange={orbitControlsChanged}
+        />
+      </div>
+
+      <div className="ml-3">
         <div>show side sensor visualization</div>
         <input
           type="checkbox"
@@ -163,7 +178,7 @@ const DroneSimulation: NextPage = () => {
       <div className="grid grid-cols-4 h-1/2">
         <div className="col-span-3">
           <Canvas className="">
-            <fog attach="fog" color="black" near={0} far={5} />
+            <fog attach="fog" color="black" near={0} far={2} />
             <color args={["#000000"]} attach="background" />
             <Physics>
               {/* <ambientLight color={"#FFFFFF"} /> */}
@@ -177,6 +192,7 @@ const DroneSimulation: NextPage = () => {
                 hideWalls={hideWalls}
                 logging={isLogging}
                 showSensorHUD={showSensorHUD}
+                orbitControls={orbitControls}
               />
               <GameMap mapDefinition={mapDefinition} />
             </Physics>

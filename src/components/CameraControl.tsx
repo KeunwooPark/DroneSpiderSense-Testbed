@@ -11,6 +11,7 @@ import { config } from "../utils/config";
 interface ICameraControlProps {
   firstPersonView: boolean;
   hideWalls: boolean;
+  orbitControls: boolean;
 }
 
 const cellLayer = config.game.map.cellLayer;
@@ -47,7 +48,7 @@ export default function CameraControl(props: ICameraControlProps) {
         zoom={config.game.camZoomLevel as number}
         makeDefault={!props.firstPersonView}
       />
-      <OrbitControls />
+      {props.orbitControls ? <OrbitControls /> : null}
     </>
   );
 }

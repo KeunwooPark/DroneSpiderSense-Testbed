@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { config } from "../utils/config";
 import IMapDefinition from "./IMapDefinition";
 
 interface IMapLoaderProps {
@@ -41,7 +42,7 @@ export default function MapLoader(props: IMapLoaderProps) {
       map: map,
       width: width,
       height: height,
-      cellSize: 1,
+      cellSize: config.game.map.cellSize,
     };
     return mapDefinition;
   };
