@@ -178,7 +178,7 @@ const DroneSimulation: NextPage = () => {
       <div className="grid grid-cols-4 h-1/2">
         <div className="col-span-3">
           <Canvas className="">
-            <fog attach="fog" color="black" near={0} far={2} />
+            <fog attach="fog" color="blue" near={0} far={2} />
             <color args={["#000000"]} attach="background" />
             <Physics>
               {/* <ambientLight color={"#FFFFFF"} /> */}
