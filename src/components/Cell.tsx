@@ -1,6 +1,7 @@
 import { useBox } from "@react-three/cannon";
 import { useLoader } from "@react-three/fiber";
 import { Mesh, TextureLoader, Vector2 } from "three";
+import * as THREE from "three";
 
 interface ICellProps {
   cellSize: number;

@@ -11,8 +11,8 @@ config.game.map.cellSize = 0.3;
 config.game.map.cellLayer = 1;
 config.game.map.minPathAreaRatio = 0.1;
 // offsets depends on how the map is generated.
-config.game.map.offsetX = -config.game.map.cellSize * 15;
-config.game.map.offsetY = 0;
+config.game.map.offsetX = -config.game.map.cellSize * 13;
+config.game.map.offsetY = 1;
 
 config.drone = {};
 config.drone.size = 0.1; // radius
