@@ -76,7 +76,7 @@ export default class DroneLog {
             angVel: this.angVel,
             isCollide: this.isCollide,
             foundTarget: this.foundTarget,
-            crossingMap: this.inMap,
+            inMap: this.inMap,
             time: this.time
         });
     }
