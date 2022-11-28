@@ -9,6 +9,7 @@ config.game.map.width = 41;
 config.game.map.height = 41;
 config.game.map.cellSize = 0.3;
 config.game.map.cellLayer = 1;
+config.game.map.mapLayer = 2;
 config.game.map.minPathAreaRatio = 0.1;
 // offsets depends on how the map is generated.
 config.game.map.offsetX = -config.game.map.cellSize * 13;

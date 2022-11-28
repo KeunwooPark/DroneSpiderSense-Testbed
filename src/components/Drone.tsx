@@ -38,9 +38,13 @@ interface IGamepadState {
 const cellLayers = new Layers();
 cellLayers.set(config.game.map.cellLayer);
 
+const mapLayers = new Layers();
+mapLayers.set(config.game.map.mapLayer);
+
 export default function Drone(props: IDroneProps) {
   const [cellCollide, setCellCollide] = useState(false);
   const [targetCollide, setTargetColllide] = useState(false);
+  const [inMap, setInMap] = useState(false);
 
   const [gamepadState, setGamepadState] = useState<IGamepadState>({
     xAxis: 0,
@@ -63,6 +67,8 @@ export default function Drone(props: IDroneProps) {
     onCollideBegin: (e) => {
       if (e.body.layers.test(cellLayers)) {
         setCellCollide(true);
+      } else if (e.body.layers.test(mapLayers)) {
+        setInMap(true);
       } else {
         setTargetColllide(true);
       }
@@ -70,6 +76,9 @@ export default function Drone(props: IDroneProps) {
     onCollideEnd: (e) => {
       if (e.body.layers.test(cellLayers)) {
         setCellCollide(false);
+      }
+      else if (e.body.layers.test(mapLayers)) {
+        setInMap(false);
       } else {
         setTargetColllide(false);
       }
@@ -116,7 +125,8 @@ export default function Drone(props: IDroneProps) {
           translateVelocityInWorld,
           angularSpeed,
           cellCollide,
-          targetCollide
+          targetCollide,
+          inMap,
         )
       );
     }

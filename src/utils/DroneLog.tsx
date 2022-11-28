@@ -4,7 +4,7 @@ export default class DroneLog {
 
     static parse(text: string): DroneLog {
         const obj = JSON.parse(text);
-        const log = new DroneLog(new Vector3(), new Quaternion(), new Vector3(), 0, false, false);
+        const log = new DroneLog(new Vector3(), new Quaternion(), new Vector3(), 0, false, false, false);
         log.posX = obj.posX;
         log.posY = obj.posY;
         log.posZ = obj.posZ;
@@ -35,8 +35,9 @@ export default class DroneLog {
     private angVel: number; // only yaw
     private isCollide: boolean;
     private foundTarget: boolean;
+    private inMap: boolean;
 
-    constructor(pos: Vector3, rot: Quaternion, vel: Vector3, angVel: number, isCollide: boolean, foundTarget: boolean) {
+    constructor(pos: Vector3, rot: Quaternion, vel: Vector3, angVel: number, isCollide: boolean, foundTarget: boolean, crossingMap: boolean) {
         this.posX = pos.x;
         this.posY = pos.y;
         this.posZ = pos.z;
@@ -56,6 +57,7 @@ export default class DroneLog {
 
         this.isCollide = isCollide;
         this.foundTarget = foundTarget;
+        this.inMap = crossingMap;
 
         this.time = Date.now();
     }
@@ -74,6 +76,7 @@ export default class DroneLog {
             angVel: this.angVel,
             isCollide: this.isCollide,
             foundTarget: this.foundTarget,
+            crossingMap: this.inMap,
             time: this.time
         });
     }
