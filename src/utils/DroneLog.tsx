@@ -89,4 +89,16 @@ export default class DroneLog {
     getVelocity(): Vector3 {
         return new Vector3(this.velX, this.velY, this.velZ);
     }
+
+    getIsCollide(): boolean {
+        return this.isCollide;
+    }
+
+    getTime(): number {
+        return this.time;
+    }
+
+    isInMap(): boolean {
+        return this.inMap;
+    }
 }

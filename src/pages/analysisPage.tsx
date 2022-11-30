@@ -1,9 +1,10 @@
 import { NextPage } from "next";
 import { useState } from "react";
-import HeadingVelocityChart from "../components/HeadingVelocityChart";
+import BasicStats from "../components/analysis/BasicStats";
+import HeadingVelocityChart from "../components/analysis/HeadingVelocityChart";
 import DroneLog from "../utils/DroneLog";
 
-const Analysys: NextPage = () => {
+const AnalysysPage: NextPage = () => {
 
     const [droneLogs, setDroneLogs] = useState<DroneLog[]>([]);
 
@@ -33,8 +34,9 @@ const Analysys: NextPage = () => {
             <div>
                 <HeadingVelocityChart droneLogs={droneLogs} />
             </div>
+            <BasicStats droneLogs={droneLogs} />
         </div>
     )
 }
 
-export default Analysys
+export default AnalysysPage

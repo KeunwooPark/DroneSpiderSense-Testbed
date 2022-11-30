@@ -2,7 +2,7 @@ import * as d3 from "d3";
 import { useEffect, useRef, useState } from "react";
 import { Vector3 } from "three";
 import { radToDeg } from "three/src/math/MathUtils";
-import DroneLog from "../utils/DroneLog";
+import DroneLog from "../../utils/DroneLog";
 
 interface IHeadingVelocityChartProps {
     droneLogs: DroneLog[];
