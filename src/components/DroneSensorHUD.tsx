@@ -1,7 +1,7 @@
-import { Line } from "@react-three/drei";
+import { Circle, Line, Sphere } from "@react-three/drei";
 import { useEffect, useState } from "react";
 import useInterval from "react-useinterval";
-import { Vector3 } from "three";
+import { Euler, Vector3 } from "three";
 import { config } from "../utils/config";
 import { calculateSensorDirection } from "../utils/Sensor";
 import IHapticPacket from "./IHapticPacket";
@@ -61,7 +61,9 @@ export default function DroneSensorHUD(props: IDroneSensorHUDProps) {
     }
 
     return(<>
-        {/* <Line position={[0, props.distance, 0]} points={[new Vector3(0, 0, 0), new Vector3(0, 0, props.size)]} color={"green"} linewidth={2} /> */}
+        <Circle position={[0, props.distance, 0]} args={[props.size, 32]} rotation={new Euler(Math.PI / 2, 0, 0)}>
+            <meshBasicMaterial color="black" transparent opacity={0.3}/>
+        </Circle>
         {getLines()}
     </>);
 }
