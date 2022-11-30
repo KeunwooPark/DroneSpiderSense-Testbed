@@ -46,7 +46,7 @@ export default function DroneSensorHUD(props: IDroneSensorHUDProps) {
         for (let i=0; i<sensorDirections.length; i++) {
             const lineLength = sensorValues[i]! * props.size;
             const lineEndPoint = sensorDirections[i]!.clone().multiplyScalar(lineLength);
-            const line = <Line position={[0, props.distance, 0]} points={[new Vector3(0,0,0), lineEndPoint]} color={"green"} linewidth={2} />
+            const line = <Line position={[0, props.distance, 0]} points={[new Vector3(0,0,0), lineEndPoint]} color={"magenta"} linewidth={2} />
             lines.push(line);
         }
 

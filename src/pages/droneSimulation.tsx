@@ -1,7 +1,7 @@
 import { Physics } from "@react-three/cannon";
 import { Canvas } from "@react-three/fiber";
 import { NextPage } from "next";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Drone from "../components/Drone";
 import GameMap from "../components/GameMap";
 import SerialCom from "../components/SerialCom";
@@ -30,6 +30,8 @@ const DroneSimulation: NextPage = () => {
     map: [],
     cellSize: config.game.map.cellSize as number,
   });
+
+  const [screenLock, setScreenLock] = useState<any>(null);
   const [isLogging, setIsLogging] = useState(false);
 
   function hideWallsChanged() {
@@ -83,6 +85,28 @@ const DroneSimulation: NextPage = () => {
     });
     saveAs(file, "mapDefinition.json");
   }
+
+  function preventScreenSleep() {
+    // @ts-ignore
+    if (!('wakeLock' in navigator)) {
+      return;
+    }
+
+    navigator.wakeLock.request('screen').then((wakeLock) => {
+      console.log("wake lock acquired");
+      setScreenLock(wakeLock);
+    })
+  }
+
+  useEffect(() => {
+    preventScreenSleep();
+
+    return () => {
+      if (screenLock) {
+        screenLock.release();
+      }
+    }
+  }, [])
 
   return (
     <div className="container mx-auto h-screen">
@@ -178,7 +202,7 @@ const DroneSimulation: NextPage = () => {
       <div className="grid grid-cols-4 h-1/2">
         <div className="col-span-3">
           <Canvas className="">
-            <fog attach="fog" color="blue" near={0} far={2} />
+            <fog attach="fog" color="yellow" near={0} far={2} />
             <color args={["#000000"]} attach="background" />
             <Physics>
               {/* <ambientLight color={"#FFFFFF"} /> */}
