@@ -19,6 +19,7 @@ interface IDistanceSensorProps {
 }
 
 const cellLayer = config.game.map.cellLayer;
+const droneSize = config.drone.size as number;
 
 export default function DistanceSensor(props: IDistanceSensorProps) {
 
@@ -75,9 +76,11 @@ export default function DistanceSensor(props: IDistanceSensorProps) {
         const {hitDistance, hitDirection} = raycast(drone, state.scene, raycaster);
         const raycastHitPoint = hitDirection.clone().multiplyScalar(hitDistance);
 
-        setRaycastHitDistance(hitDistance);
+        const offsetedHitDistance = hitDistance - droneSize;
+
+        setRaycastHitDistance(offsetedHitDistance);
         
-        const isHit = hitDistance < Infinity;
+        const isHit = offsetedHitDistance < Infinity;
         setIsHit(isHit);
 
         if (isHit) {

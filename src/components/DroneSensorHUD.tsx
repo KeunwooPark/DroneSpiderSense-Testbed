@@ -13,7 +13,8 @@ interface IDroneSensorHUDProps {
 }
 export default function DroneSensorHUD(props: IDroneSensorHUDProps) {
 
-    const [sensorDirections, setSensorDirections] = useState<Vector3[]>([]);
+    const { sensorDataQueue, distance, size } = props;
+    const [sensorLineDirections, setSensorLineDirections] = useState<Vector3[]>([]);
     const [sensorValues, setSensorValues] = useState<number[]>([]);
 
     useEffect(() => {
@@ -27,14 +28,14 @@ export default function DroneSensorHUD(props: IDroneSensorHUDProps) {
             const direction = calculateSensorDirection(i);
             sensorDirections.push(convertSensorDirectionForHUD(direction));
         }
-        setSensorDirections(sensorDirections);
+        setSensorLineDirections(sensorDirections);
         setSensorValues(sensorValues);
     }, []);
 
     useInterval(() => {
         const prevSensorValues = sensorValues.slice();
-        while (props.sensorDataQueue.length > 0) {
-            const packet = props.sensorDataQueue.shift();
+        while (sensorDataQueue.length > 0) {
+            const packet = sensorDataQueue.shift();
             prevSensorValues[packet!.actuatorID] = packet!.intensity;
         }
 
@@ -43,10 +44,14 @@ export default function DroneSensorHUD(props: IDroneSensorHUDProps) {
 
     function getLines() {
         const lines: JSX.Element[] = [];
-        for (let i=0; i<sensorDirections.length; i++) {
-            const lineLength = sensorValues[i]! * props.size;
-            const lineEndPoint = sensorDirections[i]!.clone().multiplyScalar(lineLength);
-            const line = <Line position={[0, props.distance, 0]} points={[new Vector3(0,0,0), lineEndPoint]} color={"magenta"} linewidth={2} />
+        for (let i=0; i<sensorLineDirections.length; i++) {
+            const lineStartPoint = sensorLineDirections[i]!.clone().multiplyScalar(size);
+            const lineLength = sensorValues[i]! * size;
+            const lineVec = sensorLineDirections[i]!.clone().multiplyScalar(lineLength);
+            // sensor line direction is from center. we want the lines to start from the edge of the circle.
+            // so we need to subtract the line vector from the start point.
+            const lineEndPoint = lineStartPoint.clone().sub(lineVec);
+            const line = <Line position={[0, distance, 0]} points={[lineStartPoint, lineEndPoint]} color={"magenta"} linewidth={2} />
             lines.push(line);
         }
 

@@ -18,7 +18,7 @@ export default class DroneLog {
         log.isCollide = obj.isCollide;
         log.foundTarget = obj.foundTarget;
         log.time = obj.time;
-
+        log.inMap = obj.inMap;
         return log;
     }
 

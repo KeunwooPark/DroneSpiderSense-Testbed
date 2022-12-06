@@ -1,3 +1,4 @@
+import { Vector3 } from "three";
 import DroneLog from "./DroneLog";
 
 export function calculateNumCollisions(droneLogs: DroneLog[]) : number {
@@ -61,4 +62,24 @@ export function calculateCompletionTime(droneLogs: DroneLog[]) : number {
     }
 
     return duration;
+}
+
+export function calculateVelocityStats(droneLogs: DroneLog[]) : {mean: Vector3, std: Vector3} {
+    let mean = new Vector3(0, 0, 0);
+    let std = new Vector3(0, 0, 0);
+
+    let numLogs = droneLogs.length;
+    for (const droneLog of droneLogs) {
+        mean.add(droneLog.getVelocity());
+    }
+    mean.divideScalar(numLogs);
+
+    for (const droneLog of droneLogs) {
+        let diff = droneLog.getVelocity().clone().sub(mean);
+        std.add(diff.multiply(diff));
+    }
+    std.divideScalar(numLogs);
+    std = new Vector3(Math.sqrt(std.x), Math.sqrt(std.y), Math.sqrt(std.z));
+
+    return {mean, std};
 }

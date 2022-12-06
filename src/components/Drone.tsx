@@ -127,9 +127,6 @@ export default function Drone(props: IDroneProps) {
         targetCollide,
         inMap,
       );
-
-      console.log(log);
-      
       logs.push(log);
     }
   });
@@ -159,17 +156,11 @@ export default function Drone(props: IDroneProps) {
   useEffect(
     function setSensors() {
       const distanceSensors: JSX.Element[] = [];
-      const sensorDistance = config.drone.sensorDistance as number;
       const numProbes = config.drone.numProbes as number;
       const sensorDirections: Vector3[] = [];
       const sensorValues: number[] = [];
 
       for (let i = 0; i < numProbes; i++) {
-        // const angle = i * (2 * Math.PI / numProbes);
-        // const x = Math.cos(angle) * sensorDistance;
-        // const y = Math.sin(angle) * sensorDistance;
-        // const direction = new Vector3(x, y, 0);
-        // direction.normalize();
         const direction = calculateSensorDirection(i);
         sensorDirections.push(direction.clone());
         sensorValues.push(0);
