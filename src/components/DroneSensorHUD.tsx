@@ -67,7 +67,7 @@ export default function DroneSensorHUD(props: IDroneSensorHUDProps) {
 
     return(<>
         <Circle position={[0, props.distance, 0]} args={[props.size, 32]} rotation={new Euler(Math.PI / 2, 0, 0)}>
-            <meshBasicMaterial color="black" transparent opacity={0.3}/>
+            <meshBasicMaterial color="black" transparent opacity={0.1}/>
         </Circle>
         {getLines()}
     </>);
