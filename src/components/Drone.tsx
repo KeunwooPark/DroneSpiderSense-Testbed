@@ -150,7 +150,10 @@ export default function Drone(props: IDroneProps) {
   }
 
   useEffect(() => {
-    pollGamepad(0);
+    window.addEventListener("gamepadconnected", (e) => {
+      console.log("gamepad connected");
+      pollGamepad(0);
+    })
   }, []);
 
   useEffect(
