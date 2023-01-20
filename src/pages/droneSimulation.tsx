@@ -11,19 +11,27 @@ import IMapDefinition from "../components/IMapDefinition";
 import { config } from "../utils/config";
 import { saveAs } from "file-saver";
 import MapLoader from "../components/MapLoader";
+import { Vector3 } from "three";
+import { Line } from "@react-three/drei";
+
+const traceLength = config.drone.traceLength as number;
 
 const DroneSimulation: NextPage = () => {
   const [hideWalls, setHideWalls] = useState(false);
   const [hideRays, setHideRays] = useState(false);
   const [hideSpheres, setHideSpheres] = useState(true);
   const [showAngleRange, setShowAngleRange] = useState(false);
-  const [showSensorHUD, setShowSensorHUD] = useState(false);
+  const [showSensorHUD, setShowSensorHUD] = useState(true);
   const [onlyFrontSensor, setOnlyFrontSensor] = useState(false);
   const [firstPersonView, setFirstPersonView] = useState(true);
   const [orbitControls, setOrbitControls] = useState(false);
   const [hapticPacketQueue, setHapticPacketQueue] = useState<IHapticPacket[]>(
     []
   );
+
+  const [droneTraceLines, setDroneTraceLines] = useState<JSX.Element[]>([]);
+  const [droneTraces, setDroneTraces] = useState<{ start: Vector3; end: Vector3 }[]>([]);
+
   const [mapDefinition, setMapDefinition] = useState<IMapDefinition>({
     width: 0,
     height: 0,
@@ -92,10 +100,43 @@ const DroneSimulation: NextPage = () => {
       return;
     }
 
-    navigator.wakeLock.request('screen').then((wakeLock) => {
-      console.log("wake lock acquired");
-      setScreenLock(wakeLock);
-    })
+    if (navigator.wakeLock!=null) {
+      navigator.wakeLock.request('screen').then((wakeLock) => {
+        console.log("wake lock acquired");
+        setScreenLock(wakeLock);
+      })
+    }
+  }
+
+  function onDronePositionUpdate(position: Vector3) {
+    let startPosition: Vector3 = new Vector3(0, 0, 0);
+    const newDroneTraces = droneTraces.slice();
+    if (newDroneTraces.length > 0) {
+      startPosition = newDroneTraces[newDroneTraces.length - 1]!.end.clone();
+    }
+    newDroneTraces.push({ start: startPosition, end: position.clone() });
+
+    if (newDroneTraces.length > traceLength) {
+      newDroneTraces.shift();
+    }
+
+    setDroneTraces(newDroneTraces);
+  }
+
+  function renderTraces() {
+    const droneTraceLines = droneTraces.map((droneTrace, index) => {
+      return (
+        <Line
+          key={`trace-${index}`}
+          position={[0, 0, -0.05]}
+          points={[droneTrace.start, droneTrace.end]}
+          color="green"
+          lineWidth={2}
+        />
+      );
+    });
+
+    return droneTraceLines
   }
 
   useEffect(() => {
@@ -202,7 +243,7 @@ const DroneSimulation: NextPage = () => {
       <div className="grid grid-cols-4 h-1/2">
         <div className="col-span-3">
           <Canvas className="">
-            <fog attach="fog" color="yellow" near={0} far={2} />
+            <fog attach="fog" color="blue" near={0} far={2} />
             <color args={["#000000"]} attach="background" />
             <Physics>
               {/* <ambientLight color={"#FFFFFF"} /> */}
@@ -217,9 +258,11 @@ const DroneSimulation: NextPage = () => {
                 logging={isLogging}
                 showSensorHUD={showSensorHUD}
                 orbitControls={orbitControls}
+                onPositionUpdate={onDronePositionUpdate}
               />
               <GameMap mapDefinition={mapDefinition} />
             </Physics>
+            {renderTraces()}
           </Canvas>
         </div>
       </div>

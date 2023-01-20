@@ -23,6 +23,7 @@ config.drone.speedGain = 0.4;
 config.drone.angularSpeedGain = 0.6;
 config.drone.sensorPollingInterval = 100; // ms
 config.drone.thumbstickDeadzone = 0.15;
+config.drone.traceLength = 1000;
 
 config.drone.sensor = {};
 config.drone.sensor.numSubRays = 5;

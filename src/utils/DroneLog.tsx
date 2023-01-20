@@ -101,4 +101,8 @@ export default class DroneLog {
     isInMap(): boolean {
         return this.inMap;
     }
+
+    getPosition(): Vector3 {
+        return new Vector3(this.posX, this.posY, this.posZ);
+    }
 }

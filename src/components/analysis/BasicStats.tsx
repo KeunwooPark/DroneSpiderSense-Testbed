@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Vector3 } from "three";
-import { calculateCollisionDuration, calculateCompletionTime, calculateNumCollisions, calculateVelocityStats } from "../../utils/analysis";
+import { calculateCollisionDuration, calculateCompletionTime, calculateMoveDistance, calculateNumCollisions, calculateVelocityStats } from "../../utils/analysis";
 import DroneLog from "../../utils/DroneLog";
 
 interface IBasicStatsProps {
@@ -13,7 +13,8 @@ export default function BasicStats(props: IBasicStatsProps) {
     const [numCollisions, setNumCollisions] = useState<number>(0);
     const [collisionDuration, setCollisionDuration] = useState<number>(0);
     const [completionTime, setCompletionTime] = useState<number>(0);
-    const [veloctyStat, setVelocityStat] = useState<{mean: Vector3, std: Vector3}>({mean: new Vector3(), std: new Vector3()});
+    const [moveDistance, setMoveDistance] = useState<number>(0);
+    const [veloctyStat, setVelocityStat] = useState<{mean: number, std: number}>({mean: 0, std: 0});
 
     useEffect(() => {
         if (droneLogs == null || droneLogs.length == 0) {
@@ -22,6 +23,7 @@ export default function BasicStats(props: IBasicStatsProps) {
         const numCollisions = calculateNumCollisions(droneLogs);
         const collisionDuration = calculateCollisionDuration(droneLogs);
         const completionTime = calculateCompletionTime(droneLogs);
+        const moveDistance = calculateMoveDistance(droneLogs);
 
         const {mean: velMean, std: velStd} = calculateVelocityStats(droneLogs);
 
@@ -29,6 +31,7 @@ export default function BasicStats(props: IBasicStatsProps) {
         setCollisionDuration(collisionDuration);
         setCompletionTime(completionTime);
         setVelocityStat({mean: velMean, std: velStd});
+        setMoveDistance(moveDistance);
 
     }, [droneLogs]);
 
@@ -50,11 +53,15 @@ export default function BasicStats(props: IBasicStatsProps) {
                 </div>
                 <div className="my-2">
                     <span className="font-bold">Velocity mean: </span>
-                    <span>{veloctyStat.mean.x.toFixed(4)}, {veloctyStat.mean.y.toFixed(4)}, {veloctyStat.mean.z.toFixed(4)}</span>
+                    <span>{veloctyStat.mean.toFixed(4)}</span>
                 </div>
                 <div className="my-2">
                     <span className="font-bold">Velocity std: </span>
-                    <span>{veloctyStat.std.x.toFixed(4)}, {veloctyStat.std.y.toFixed(4)}, {veloctyStat.std.z.toFixed(4)}</span>
+                    <span>{veloctyStat.std.toFixed(4)}</span>
+                </div>
+                <div className="my-2">
+                    <span className="font-bold">Move Distance: </span>
+                    <span>{moveDistance.toFixed(4)}</span>
                 </div>
             </div>
         </div>

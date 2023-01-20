@@ -27,6 +27,7 @@ interface IDroneProps {
   logging: boolean;
   showSensorHUD: boolean;
   orbitControls: boolean;
+  onPositionUpdate: (position: Vector3) => void;
 }
 
 interface IGamepadState {
@@ -40,6 +41,8 @@ cellLayers.set(config.game.map.cellLayer);
 
 const mapLayers = new Layers();
 mapLayers.set(config.game.map.mapLayer);
+
+
 
 export default function Drone(props: IDroneProps) {
   const [cellCollide, setCellCollide] = useState(false);
@@ -57,6 +60,7 @@ export default function Drone(props: IDroneProps) {
   const [isLogging, setIsLogging] = useState(false);
 
   const droneArgs: SphereArgs = [config.drone.size as number];
+  const [lastPosition, setLastPosition] = useState<Vector3>(new Vector3(0, 0, 0));
 
   const [droneRef, droneApi] = useSphere<Mesh>(() => ({
     mass: 1,
@@ -93,7 +97,12 @@ export default function Drone(props: IDroneProps) {
     const drone = droneRef.current as Mesh;
     const droneWorldPos = new Vector3();
     drone.getWorldPosition(droneWorldPos);
-
+    
+    if (!lastPosition.equals(droneWorldPos)) {
+      props.onPositionUpdate(droneWorldPos.clone());
+      setLastPosition(droneWorldPos.clone());
+    }
+    
     const speedGain = config.drone.speedGain as number;
     const translateVelocity = new Vector3(
       gamepadState.xAxis,
@@ -145,7 +154,6 @@ export default function Drone(props: IDroneProps) {
       yaw = applyDeadzone(yaw, deadzone);
       setGamepadState({ xAxis, yAxis, yaw });
     }
-
     requestAnimationFrame(pollGamepad);
   }
 
@@ -241,8 +249,8 @@ export default function Drone(props: IDroneProps) {
         />
         <HeadupNoti
           position={[0, 0.1, 0]}
-          visible={cellCollide || targetCollide}
-          message={targetCollide ? "found target" : "collision"}
+          visible={cellCollide || !inMap}
+          message={inMap ? "collide" : "out"}
         />
         {props.onlyFrontSensor ? distanceSensors[2] : distanceSensors}
         {props.showSensorHUD ? (

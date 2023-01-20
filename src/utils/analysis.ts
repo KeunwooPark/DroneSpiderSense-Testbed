@@ -26,6 +26,9 @@ export function calculateCollisionDuration(droneLogs: DroneLog[]) : number {
     let startCollisionTime = 0;
 
     for (const droneLog of droneLogs) {
+        if (!droneLog.isInMap()) {
+            continue;
+        }
         if (droneLog.getIsCollide()) {
             if (!isCollide) {
                 startCollisionTime = droneLog.getTime();
@@ -64,22 +67,42 @@ export function calculateCompletionTime(droneLogs: DroneLog[]) : number {
     return duration;
 }
 
-export function calculateVelocityStats(droneLogs: DroneLog[]) : {mean: Vector3, std: Vector3} {
-    let mean = new Vector3(0, 0, 0);
-    let std = new Vector3(0, 0, 0);
+export function calculateVelocityStats(droneLogs: DroneLog[]) : {mean: number, std: number} {
+    let mean = 0;
+    let std = 0;
 
     let numLogs = droneLogs.length;
     for (const droneLog of droneLogs) {
-        mean.add(droneLog.getVelocity());
+        const velocity = droneLog.getVelocity();
+        mean += velocity.length();
     }
-    mean.divideScalar(numLogs);
+
+    mean /= numLogs;
 
     for (const droneLog of droneLogs) {
-        let diff = droneLog.getVelocity().clone().sub(mean);
-        std.add(diff.multiply(diff));
+        let diff = droneLog.getVelocity().length() - mean;
+        std += (diff * diff);
     }
-    std.divideScalar(numLogs);
-    std = new Vector3(Math.sqrt(std.x), Math.sqrt(std.y), Math.sqrt(std.z));
+    console.log(std);
+    std /= numLogs;
+    std = Math.sqrt(std);
 
     return {mean, std};
+}
+
+export function calculateMoveDistance(droneLogs: DroneLog[]) : number {
+    let distance = 0;
+    let prevPosition = new Vector3();
+    let isFirst = true;
+    for (const droneLog of droneLogs) {
+        if (isFirst) {
+            prevPosition = droneLog.getPosition();
+            isFirst = false;
+            continue;
+        }
+        distance += droneLog.getPosition().distanceTo(prevPosition);
+        prevPosition = droneLog.getPosition();
+    }
+
+    return distance;
 }
